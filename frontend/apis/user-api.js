@@ -17,6 +17,21 @@ const signup = data => {
     });
 };
 
+const checkAvailability = data => {
+  return fetch("/api/checks", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => {
+      return response.json();
+    })
+    .catch(err => console.log(err));
+};
+
 const list = () => {
   return fetch("/api/users", {
     method: "GET"
@@ -80,4 +95,4 @@ const moveAndDelete = (param, auth) => {
     .catch(e => console.log(e));
 };
 
-export { signup, list, getCurrentUser, updateCurrentUser, moveAndDelete };
+export { signup, list, getCurrentUser, updateCurrentUser, moveAndDelete, checkAvailability };

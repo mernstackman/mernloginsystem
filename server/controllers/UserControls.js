@@ -143,6 +143,40 @@ const get_one = (req, res, next) => {
   // next();
 };
 
+// Check username and email availability
+const check_unique = (req, res) => {
+  const regex = /.+\@.+\..+/;
+  let field = {};
+  let fieldLabel = "";
+
+  if (req.body.email) {
+    field = { email: req.body.email };
+    fieldLabel = "email";
+  }
+
+  if (req.body.username) {
+    field = { username: req.body.username };
+    fieldLabel = "username";
+  }
+
+  UserModel.findOne(field)
+    .select("username email")
+    .lean()
+    .then(result => {
+      if (result) {
+        return res.json({
+          message: `${fieldLabel} already used!`,
+          inUse: true
+        });
+      }
+
+      return res.json({
+        message: "Available",
+        inUse: false
+      });
+    });
+};
+
 export default {
   create,
   list,
@@ -151,5 +185,6 @@ export default {
   move_and_delete,
   delete_one,
   update_one,
-  get_one
+  get_one,
+  check_unique
 };

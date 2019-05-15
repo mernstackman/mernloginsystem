@@ -116,6 +116,21 @@ var signup = function signup(data) {
   });
 };
 
+var checkAvailability = function checkAvailability(data) {
+  return fetch("/api/checks", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  }).then(function (response) {
+    return response.json();
+  }).catch(function (err) {
+    return console.log(err);
+  });
+};
+
 var list = function list() {
   return fetch("/api/users", {
     method: "GET"
@@ -178,6 +193,7 @@ exports.list = list;
 exports.getCurrentUser = getCurrentUser;
 exports.updateCurrentUser = updateCurrentUser;
 exports.moveAndDelete = moveAndDelete;
+exports.checkAvailability = checkAvailability;
 
 /***/ }),
 
@@ -1589,6 +1605,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(/*! react */ "./node_modules/react/index.js");
@@ -1611,6 +1629,14 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
   This script is not yet completed. There several features that need to be added.
 */
 
+var errMsg = {
+  fullname: { length: "Full name should be between 3 to 100 characters long." },
+  username: { length: "Username should be between 3 to 20 characters long.", exist: "" },
+  email: { match: "" },
+  password: { length: "", contains: "", match: "" },
+  password_confirm: { length: "", contains: "", match: "" }
+};
+
 var SignUp = function (_Component) {
   _inherits(SignUp, _Component);
 
@@ -1632,18 +1658,60 @@ var SignUp = function (_Component) {
       password: "",
       password_confirm: "",
       open: false,
-      error: ""
-    }, _this.handleChange = function (e) {
-      _this.setState(_defineProperty({}, e.target.name, e.target.value));
+      error: "",
+      specError: {
+        fullname: { long: false },
+        username: { long: false, existed: false },
+        email: { matched: false },
+        password: { long: false, containing: false, matched: false },
+        password_confirm: { long: false, containing: false, matched: false }
+      },
+      globalError: false
+    }, _this.handleError = function () {}, _this.handleChange = function (e) {
+      var _e$target = e.target,
+          name = _e$target.name,
+          value = _e$target.value;
+
+      var specErrorCopy = _extends({}, _this.state.specError);
+
+      // Validate here
+      switch (name) {
+        case "fullname":
+          specErrorCopy.fullname.long = value.length <= 100 && value.length >= 3 ? false : true;
+          break;
+        case "username":
+          specErrorCopy.username.long = value.length <= 20 && value.length >= 3 ? false : true;
+          // compare value with the available record using ...?
+          var data = { username: value };
+          (0, _userApi.checkAvailability)(data).then(function (response) {
+            specErrorCopy.username.existed = response.inUse;
+            console.log(specErrorCopy.username.existed, response.message);
+          });
+          break;
+        case "email":
+          break;
+        case "password":
+          break;
+        case "password_confirm":
+          break;
+        default:
+          break;
+      }
+
+      _this.setState(_defineProperty({ specError: specErrorCopy }, name, value));
+      // console.log(errList);
+      console.log(value);
+      // console.log(this.state.fullname);
+      console.log(_this.state.specError.fullname.long);
     }, _this.createNewMember = function (e) {
+      var _this$state;
+
       e.preventDefault();
-      var data = {
-        fullname: _this.state.fullname,
-        username: _this.state.username,
-        email: _this.state.email,
-        password: _this.state.password,
-        password_confirm: _this.state.password_confirm
-      };
+      // Check if there are error before submitting. Something check if there are error message under input field.
+
+      var data = (_this$state = _extends({}, _this.state), fullname = _this$state.fullname, username = _this$state.username, email = _this$state.email, password = _this$state.password, password_confirm = _this$state.password_confirm, _this$state);
+
+      console.log(_this.state);
 
       (0, _userApi.signup)(data).then(function (response) {
         if (response.error) {
@@ -1686,6 +1754,7 @@ var SignUp = function (_Component) {
             onChange: this.handleChange
           }),
           " ",
+          this.state.specError.fullname.long && "Error",
           _react2.default.createElement("br", null),
           _react2.default.createElement("br", null),
           _react2.default.createElement(

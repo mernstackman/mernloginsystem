@@ -5,13 +5,15 @@ import authControl from "../controllers/AuthControls";
 
 const user_router = express.Router();
 
-// Post/ create new user to database
+// General users
 user_router
   .route("/api/users")
   .post(UserControl.create) // create new user
   .get(UserControl.list); // list users
 //.delete(UserControl.clean_all); // delete all documents in collection {experimental}
 
+user_router.route("/api/checks").post(UserControl.check_unique); // create new user
+// Specific user by id
 user_router
   .route("/api/users/:user_id")
   .get(authControl.signedInOnly, UserControl.get_one)
@@ -19,7 +21,8 @@ user_router
   .delete(authControl.signedInOnly, authControl.currentUserOnly, UserControl.delete_one)
   .post(authControl.signedInOnly, authControl.currentUserOnly, UserControl.move_and_delete);
 
-user_router.route("/api/users/backup");
+// Backup user before deletion
+// user_router.route("/api/users/backup");
 
 user_router.param("user_id", UserControl.user_id);
 

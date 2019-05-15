@@ -1,9 +1,16 @@
 import React, { Component } from "react";
-import { signup } from "./../../apis/user-api";
-
+import { signup, checkAvailability } from "./../../apis/user-api";
 /* 
   This script is not yet completed. There several features that need to be added.
 */
+
+const errMsg = {
+  fullname: { length: "Full name should be between 3 to 100 characters long." },
+  username: { length: "Username should be between 3 to 20 characters long.", exist: "" },
+  email: { match: "" },
+  password: { length: "", contains: "", match: "" },
+  password_confirm: { length: "", contains: "", match: "" }
+};
 
 class SignUp extends Component {
   state = {
@@ -13,24 +20,61 @@ class SignUp extends Component {
     password: "",
     password_confirm: "",
     open: false,
-    error: ""
+    error: "",
+    specError: {
+      fullname: { long: false },
+      username: { long: false, existed: false },
+      email: { matched: false },
+      password: { long: false, containing: false, matched: false },
+      password_confirm: { long: false, containing: false, matched: false }
+    },
+    globalError: false
   };
 
+  handleError = () => {};
+
   handleChange = e => {
-    this.setState({
-      [e.target.name]: e.target.value
-    });
+    const { name, value } = e.target;
+    const specErrorCopy = { ...this.state.specError };
+
+    // Validate here
+    switch (name) {
+      case "fullname":
+        specErrorCopy.fullname.long = value.length <= 100 && value.length >= 3 ? false : true;
+        break;
+      case "username":
+        specErrorCopy.username.long = value.length <= 20 && value.length >= 3 ? false : true;
+        // compare value with the available record using ...?
+        const data = { username: value };
+        checkAvailability(data).then(response => {
+          specErrorCopy.username.existed = response.inUse;
+          console.log(specErrorCopy.username.existed, response.message);
+        });
+        break;
+      case "email":
+        break;
+      case "password":
+        break;
+      case "password_confirm":
+        break;
+      default:
+        break;
+    }
+
+    this.setState({ specError: specErrorCopy, [name]: value });
+    // console.log(errList);
+    console.log(value);
+    // console.log(this.state.fullname);
+    console.log(this.state.specError.fullname.long);
   };
 
   createNewMember = e => {
     e.preventDefault();
-    const data = {
-      fullname: this.state.fullname,
-      username: this.state.username,
-      email: this.state.email,
-      password: this.state.password,
-      password_confirm: this.state.password_confirm
-    };
+    // Check if there are error before submitting. Something check if there are error message under input field.
+
+    const data = ({ fullname, username, email, password, password_confirm } = { ...this.state });
+
+    console.log(this.state);
 
     signup(data).then(response => {
       if (response.error) {
@@ -56,6 +100,7 @@ class SignUp extends Component {
             placeholder="Full name"
             onChange={this.handleChange}
           />{" "}
+          {this.state.specError.fullname.long && "Error"}
           <br />
           <br />
           <label htmlFor="username">Username:</label> <br />
