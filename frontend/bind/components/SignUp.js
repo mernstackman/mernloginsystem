@@ -4,13 +4,13 @@ import { signup, checkAvailability } from "./../../apis/user-api";
   This script is not yet completed. There several features that need to be added.
 */
 
-const errMsg = {
-  fullname: { length: "Full name should be between 3 to 100 characters long." },
-  username: { length: "Username should be between 3 to 20 characters long.", exist: "" },
+/* const errMsg = {
+  fullname: { long: "Full name should be between 3 to 100 characters long." },
+  username: { long: "Username should be between 3 to 20 characters long.", exist: "" },
   email: { match: "" },
-  password: { length: "", contains: "", match: "" },
-  password_confirm: { length: "", contains: "", match: "" }
-};
+  password: { long: "", contains: "", match: "" },
+  password_confirm: { long: "", contains: "", match: "" }
+}; */
 
 class SignUp extends Component {
   state = {
@@ -22,11 +22,11 @@ class SignUp extends Component {
     open: false,
     error: "",
     specError: {
-      fullname: { long: false },
-      username: { long: false, existed: false },
-      email: { matched: false },
-      password: { long: false, containing: false, matched: false },
-      password_confirm: { long: false, containing: false, matched: false }
+      fullname: { long: "" },
+      username: { long: "", existed: "" },
+      email: { matched: "", existed: "" },
+      password: { contains: "", matched: "" },
+      password_confirm: { contains: "", matched: "" }
     },
     globalError: false
   };
@@ -36,36 +36,66 @@ class SignUp extends Component {
   handleChange = e => {
     const { name, value } = e.target;
     const specErrorCopy = { ...this.state.specError };
+    const mailRegex = /.+\@.+\..+/;
+    const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+    let data;
 
+    // let message = "";
     // Validate here
     switch (name) {
       case "fullname":
-        specErrorCopy.fullname.long = value.length <= 100 && value.length >= 3 ? false : true;
+        specErrorCopy.fullname.long =
+          value.length <= 100 && value.length >= 3
+            ? ""
+            : "Full name should be between 3 to 100 characters long.";
         break;
       case "username":
-        specErrorCopy.username.long = value.length <= 20 && value.length >= 3 ? false : true;
+        specErrorCopy.username.long =
+          value.length <= 20 && value.length >= 3
+            ? ""
+            : "Username should be between 3 to 20 characters long.";
+
         // compare value with the available record using ...?
-        const data = { username: value };
+        data = { username: value };
         checkAvailability(data).then(response => {
-          specErrorCopy.username.existed = response.inUse;
-          console.log(specErrorCopy.username.existed, response.message);
+          specErrorCopy.username.existed = response.message;
         });
         break;
       case "email":
+        specErrorCopy.email.matched = mailRegex.test(value) ? "" : "Please enter valid email!";
+
+        data = { email: value };
+        checkAvailability(data).then(response => {
+          specErrorCopy.email.existed = response.message;
+        });
         break;
       case "password":
+        specErrorCopy.password.contains = passRegex.test(value)
+          ? ""
+          : "Password should at least 6 characters long, contains 1 lowercase, 1 uppercase and 1 special character!";
+
+        specErrorCopy.password.matched =
+          value == this.state.password_confirm && this.state.password_confirm != ""
+            ? ""
+            : "Password not match!";
+
         break;
       case "password_confirm":
+        specErrorCopy.password_confirm.contains = passRegex.test(value)
+          ? ""
+          : "Password should at least 6 characters long, contains 1 lowercase, 1 uppercase and 1 special character!";
+
+        specErrorCopy.password_confirm.matched =
+          value == this.state.password && this.state.password != "" ? "" : "Password not match!";
         break;
       default:
         break;
     }
 
     this.setState({ specError: specErrorCopy, [name]: value });
-    // console.log(errList);
-    console.log(value);
-    // console.log(this.state.fullname);
-    console.log(this.state.specError.fullname.long);
+    /*     console.log(value);
+    console.log(this.state.specError.fullname.long); */
+    console.log(this.state.password_confirm);
   };
 
   createNewMember = e => {

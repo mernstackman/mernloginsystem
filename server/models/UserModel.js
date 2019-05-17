@@ -71,8 +71,9 @@ UserSchema.virtual("password_confirm")
 // -?test-> check what happens if validate is applied to virtual path named password
 UserSchema.path("password_hash").validate(function(value) {
   if (this._password || this.passwordConfirm) {
-    if (this._password.length < 6) {
-      this.invalidate("password", "The password's length should be 6 characters or more!");
+    const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+    if (passRegex.test(this._password)) {
+      this.invalidate("password", "Password don't match the requirements!");
     }
 
     if (this._password !== this.passwordConfirm) {

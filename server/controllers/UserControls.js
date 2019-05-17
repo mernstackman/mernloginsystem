@@ -145,7 +145,6 @@ const get_one = (req, res, next) => {
 
 // Check username and email availability
 const check_unique = (req, res) => {
-  const regex = /.+\@.+\..+/;
   let field = {};
   let fieldLabel = "";
 
@@ -171,7 +170,7 @@ const check_unique = (req, res) => {
       }
 
       return res.json({
-        message: "Available",
+        message: "",
         inUse: false
       });
     });
