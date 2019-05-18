@@ -158,22 +158,26 @@ const check_unique = (req, res) => {
     fieldLabel = "username";
   }
 
-  UserModel.findOne(field)
-    .select("username email")
-    .lean()
-    .then(result => {
-      if (result) {
-        return res.json({
-          message: `${fieldLabel} already used!`,
-          inUse: true
-        });
-      }
+  if (req.body.username || req.body.email) {
+    // console.log(req.body.username);
 
-      return res.json({
-        message: "",
-        inUse: false
+    UserModel.findOne(field)
+      .select("username email")
+      .lean()
+      .then(result => {
+        if (result) {
+          return res.json({
+            message: `${fieldLabel} already used!`,
+            inUse: true
+          });
+        }
+
+        return res.json({
+          message: "",
+          inUse: false
+        });
       });
-    });
+  }
 };
 
 export default {

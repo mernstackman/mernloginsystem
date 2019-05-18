@@ -1661,7 +1661,7 @@ var SignUp = function (_Component) {
       error: "",
       specError: {
         fullname: { long: "" },
-        username: { long: "", existed: "" },
+        username: { long: "", existed: "", spechar: "" },
         email: { matched: "", existed: "" },
         password: { contains: "", matched: "" },
         password_confirm: { contains: "", matched: "" }
@@ -1675,21 +1675,25 @@ var SignUp = function (_Component) {
       var specErrorCopy = _extends({}, _this.state.specError);
       var mailRegex = /.+\@.+\..+/;
       var passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+      var userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
       var data = void 0;
 
-      // let message = "";
+      var message = "";
       // Validate here
       switch (name) {
         case "fullname":
-          specErrorCopy.fullname.long = value.length <= 100 && value.length >= 3 ? "" : "Full name should be between 3 to 100 characters long.";
+          specErrorCopy.fullname.long = value.length > 100 || value.length < 3 ? "Full name should be between 3 to 100 characters long." : "";
+          console.log(specErrorCopy.fullname.long);
           break;
         case "username":
-          specErrorCopy.username.long = value.length <= 20 && value.length >= 3 ? "" : "Username should be between 3 to 20 characters long.";
-
+          specErrorCopy.username.long = value.length > 20 || value.length < 3 ? "Username should be between 3 to 20 characters long." : "";
+          specErrorCopy.username.spechar = userRegex.test(value) ? "Username cannot contains space or restricted special characters!" : "";
           // compare value with the available record using ...?
           data = { username: value };
           (0, _userApi.checkAvailability)(data).then(function (response) {
             specErrorCopy.username.existed = response.message;
+            _this.setState({ specError: specErrorCopy });
+            console.log(response.message);
           });
           break;
         case "email":
@@ -1698,6 +1702,7 @@ var SignUp = function (_Component) {
           data = { email: value };
           (0, _userApi.checkAvailability)(data).then(function (response) {
             specErrorCopy.email.existed = response.message;
+            _this.setState({ specError: specErrorCopy });
           });
           break;
         case "password":
@@ -1718,7 +1723,8 @@ var SignUp = function (_Component) {
       _this.setState(_defineProperty({ specError: specErrorCopy }, name, value));
       /*     console.log(value);
       console.log(this.state.specError.fullname.long); */
-      console.log(_this.state.password_confirm);
+      console.log(specErrorCopy.username.spechar);
+      console.log(specErrorCopy.username.existed);
     }, _this.createNewMember = function (e) {
       var _this$state;
 
@@ -1744,6 +1750,14 @@ var SignUp = function (_Component) {
   _createClass(SignUp, [{
     key: "render",
     value: function render() {
+      var _state$specError = this.state.specError,
+          fullname = _state$specError.fullname,
+          username = _state$specError.username,
+          email = _state$specError.email,
+          password = _state$specError.password,
+          password_confirm = _state$specError.password_confirm;
+
+      console.log(username.existed.length);
       return _react2.default.createElement(
         "div",
         null,
@@ -1756,91 +1770,126 @@ var SignUp = function (_Component) {
           "form",
           { onSubmit: this.createNewMember, noValidate: true },
           _react2.default.createElement(
-            "label",
-            { htmlFor: "fullname" },
-            "Name:"
+            "div",
+            null,
+            _react2.default.createElement(
+              "label",
+              { htmlFor: "fullname" },
+              "Name:"
+            ),
+            " ",
+            _react2.default.createElement("br", null),
+            _react2.default.createElement("input", {
+              type: "text",
+              name: "fullname",
+              id: "fullname",
+              placeholder: "Full name",
+              onChange: this.handleChange
+            }),
+            " ",
+            _react2.default.createElement("br", null),
+            fullname.long.length > 0 && _react2.default.createElement(
+              "span",
+              null,
+              fullname.long
+            )
           ),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("input", {
-            type: "text",
-            name: "fullname",
-            id: "fullname",
-            placeholder: "Full name",
-            onChange: this.handleChange
-          }),
-          " ",
-          this.state.specError.fullname.long && "Error",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("br", null),
           _react2.default.createElement(
-            "label",
-            { htmlFor: "username" },
-            "Username:"
+            "div",
+            null,
+            _react2.default.createElement(
+              "label",
+              { htmlFor: "username" },
+              "Username:"
+            ),
+            " ",
+            _react2.default.createElement("br", null),
+            _react2.default.createElement("input", {
+              type: "text",
+              name: "username",
+              id: "username",
+              placeholder: "Username",
+              onChange: this.handleChange
+            }),
+            " ",
+            username.long.length > 0 && _react2.default.createElement(
+              "span",
+              null,
+              _react2.default.createElement("br", null),
+              username.long
+            ),
+            username.existed.length > 0 && _react2.default.createElement(
+              "span",
+              null,
+              _react2.default.createElement("br", null),
+              " ",
+              username.existed
+            ),
+            username.spechar.length > 0 && _react2.default.createElement(
+              "span",
+              null,
+              _react2.default.createElement("br", null),
+              " ",
+              username.spechar
+            )
           ),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("input", {
-            type: "text",
-            name: "username",
-            id: "username",
-            placeholder: "Username",
-            onChange: this.handleChange
-          }),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("br", null),
           _react2.default.createElement(
-            "label",
-            { htmlFor: "email" },
-            "Email:"
+            "div",
+            null,
+            _react2.default.createElement(
+              "label",
+              { htmlFor: "email" },
+              "Email:"
+            ),
+            " ",
+            _react2.default.createElement("br", null),
+            _react2.default.createElement("input", {
+              type: "email",
+              name: "email",
+              id: "email",
+              placeholder: "Email",
+              onChange: this.handleChange,
+              noValidate: true
+            }),
+            " "
           ),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("input", {
-            type: "email",
-            name: "email",
-            id: "email",
-            placeholder: "Email",
-            onChange: this.handleChange,
-            noValidate: true
-          }),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("br", null),
           _react2.default.createElement(
-            "label",
-            { htmlFor: "password" },
-            "Password:"
+            "div",
+            null,
+            _react2.default.createElement(
+              "label",
+              { htmlFor: "password" },
+              "Password:"
+            ),
+            " ",
+            _react2.default.createElement("br", null),
+            _react2.default.createElement("input", {
+              type: "password",
+              name: "password",
+              id: "password",
+              placeholder: "Password",
+              onChange: this.handleChange
+            }),
+            " "
           ),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("input", {
-            type: "password",
-            name: "password",
-            id: "password",
-            placeholder: "Password",
-            onChange: this.handleChange
-          }),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("br", null),
           _react2.default.createElement(
-            "label",
-            { htmlFor: "password_confirm" },
-            "Confirm password:"
+            "div",
+            null,
+            _react2.default.createElement(
+              "label",
+              { htmlFor: "password_confirm" },
+              "Confirm password:"
+            ),
+            " ",
+            _react2.default.createElement("br", null),
+            _react2.default.createElement("input", {
+              type: "password",
+              name: "password_confirm",
+              id: "password_confirm",
+              placeholder: "Confirm password",
+              onChange: this.handleChange
+            })
           ),
-          " ",
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("input", {
-            type: "password",
-            name: "password_confirm",
-            id: "password_confirm",
-            placeholder: "Confirm password",
-            onChange: this.handleChange
-          }),
-          _react2.default.createElement("br", null),
-          _react2.default.createElement("br", null),
           _react2.default.createElement("input", { type: "submit", value: "Submit" })
         )
       );

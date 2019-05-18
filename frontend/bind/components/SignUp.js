@@ -23,7 +23,7 @@ class SignUp extends Component {
     error: "",
     specError: {
       fullname: { long: "" },
-      username: { long: "", existed: "" },
+      username: { long: "", existed: "", spechar: "" },
       email: { matched: "", existed: "" },
       password: { contains: "", matched: "" },
       password_confirm: { contains: "", matched: "" }
@@ -35,30 +35,36 @@ class SignUp extends Component {
 
   handleChange = e => {
     const { name, value } = e.target;
-    const specErrorCopy = { ...this.state.specError };
+    var specErrorCopy = { ...this.state.specError };
     const mailRegex = /.+\@.+\..+/;
     const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+    const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
     let data;
 
-    // let message = "";
+    let message = "";
     // Validate here
     switch (name) {
       case "fullname":
         specErrorCopy.fullname.long =
-          value.length <= 100 && value.length >= 3
-            ? ""
-            : "Full name should be between 3 to 100 characters long.";
+          value.length > 100 || value.length < 3
+            ? "Full name should be between 3 to 100 characters long."
+            : "";
+        console.log(specErrorCopy.fullname.long);
         break;
       case "username":
         specErrorCopy.username.long =
-          value.length <= 20 && value.length >= 3
-            ? ""
-            : "Username should be between 3 to 20 characters long.";
-
+          value.length > 20 || value.length < 3
+            ? "Username should be between 3 to 20 characters long."
+            : "";
+        specErrorCopy.username.spechar = userRegex.test(value)
+          ? "Username cannot contain space or restricted special characters!"
+          : "";
         // compare value with the available record using ...?
         data = { username: value };
         checkAvailability(data).then(response => {
           specErrorCopy.username.existed = response.message;
+          this.setState({ specError: specErrorCopy });
+          console.log(response.message);
         });
         break;
       case "email":
@@ -67,6 +73,7 @@ class SignUp extends Component {
         data = { email: value };
         checkAvailability(data).then(response => {
           specErrorCopy.email.existed = response.message;
+          this.setState({ specError: specErrorCopy });
         });
         break;
       case "password":
@@ -95,7 +102,8 @@ class SignUp extends Component {
     this.setState({ specError: specErrorCopy, [name]: value });
     /*     console.log(value);
     console.log(this.state.specError.fullname.long); */
-    console.log(this.state.password_confirm);
+    console.log(specErrorCopy.username.spechar);
+    console.log(specErrorCopy.username.existed);
   };
 
   createNewMember = e => {
@@ -118,62 +126,85 @@ class SignUp extends Component {
   };
 
   render() {
+    const { fullname, username, email, password, password_confirm } = this.state.specError;
+    console.log(username.existed.length);
     return (
       <div>
         {this.state.error && <p>{this.state.error.toString()}</p>}
         <form onSubmit={this.createNewMember} noValidate>
-          <label htmlFor="fullname">Name:</label> <br />
-          <input
-            type="text"
-            name="fullname"
-            id="fullname"
-            placeholder="Full name"
-            onChange={this.handleChange}
-          />{" "}
-          {this.state.specError.fullname.long && "Error"}
-          <br />
-          <br />
-          <label htmlFor="username">Username:</label> <br />
-          <input
-            type="text"
-            name="username"
-            id="username"
-            placeholder="Username"
-            onChange={this.handleChange}
-          />{" "}
-          <br />
-          <br />
-          <label htmlFor="email">Email:</label> <br />
-          <input
-            type="email"
-            name="email"
-            id="email"
-            placeholder="Email"
-            onChange={this.handleChange}
-            noValidate
-          />{" "}
-          <br />
-          <br />
-          <label htmlFor="password">Password:</label> <br />
-          <input
-            type="password"
-            name="password"
-            id="password"
-            placeholder="Password"
-            onChange={this.handleChange}
-          />{" "}
-          <br />
-          <br />
-          <label htmlFor="password_confirm">Confirm password:</label> <br />
-          <input
-            type="password"
-            name="password_confirm"
-            id="password_confirm"
-            placeholder="Confirm password"
-            onChange={this.handleChange}
-          />
-          <br />
-          <br />
+          <div>
+            <label htmlFor="fullname">Name:</label> <br />
+            <input
+              type="text"
+              name="fullname"
+              id="fullname"
+              placeholder="Full name"
+              onChange={this.handleChange}
+            />{" "}
+            <br />
+            {fullname.long.length > 0 && <span>{fullname.long}</span>}
+          </div>
+          <div>
+            <label htmlFor="username">Username:</label> <br />
+            <input
+              type="text"
+              name="username"
+              id="username"
+              placeholder="Username"
+              onChange={this.handleChange}
+            />{" "}
+            {username.long.length > 0 && (
+              <span>
+                <br />
+                {username.long}
+              </span>
+            )}
+            {username.existed.length > 0 && (
+              <span>
+                <br /> {username.existed}
+              </span>
+            )}
+            {username.spechar.length > 0 && (
+              <span>
+                <br /> {username.spechar}
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="email">Email:</label> <br />
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="Email"
+              onChange={this.handleChange}
+              noValidate
+            />{" "}
+          </div>
+
+          <div>
+            <label htmlFor="password">Password:</label> <br />
+            <input
+              type="password"
+              name="password"
+              id="password"
+              placeholder="Password"
+              onChange={this.handleChange}
+            />{" "}
+          </div>
+
+          <div>
+            <label htmlFor="password_confirm">Confirm password:</label> <br />
+            <input
+              type="password"
+              name="password_confirm"
+              id="password_confirm"
+              placeholder="Confirm password"
+              onChange={this.handleChange}
+            />
+          </div>
+
           <input type="submit" value="Submit" />
         </form>
       </div>

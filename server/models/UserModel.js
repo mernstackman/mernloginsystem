@@ -93,6 +93,14 @@ UserSchema.path("fullname").validate(function(value) {
   }
 });
 
+// Validate username
+UserSchema.path("username").validate(function(value) {
+  const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
+  if (userRegex.test(value)) {
+    this.invalidate("username", "Username cannot contain space or restricted special characters!");
+  }
+});
+
 /* ADDITIONAL METHODS */
 UserSchema.methods = {
   comparePassword: function(loginPassword) {
