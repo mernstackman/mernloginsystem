@@ -6,7 +6,7 @@ import crypto from "crypto";
 mongoose.set("useCreateIndex", true);
 
 const Schema = mongoose.Schema;
-
+const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const UserSchema = new Schema({
   fullname: {
     type: String,
@@ -23,7 +23,7 @@ const UserSchema = new Schema({
     type: String,
     trim: true,
     unique: true,
-    match: [/.+\@.+\..+/, "Please enter valid email!"],
+    match: [emailRegex, "Please enter valid email!"],
     required: true
   },
   password_hash: {

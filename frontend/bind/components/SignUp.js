@@ -36,7 +36,8 @@ class SignUp extends Component {
   handleChange = e => {
     const { name, value } = e.target;
     var specErrorCopy = { ...this.state.specError };
-    const mailRegex = /.+\@.+\..+/;
+    const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+    // const mailRegex = /.+\@.+\..+/;
     const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
     const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
     let data;
@@ -82,9 +83,9 @@ class SignUp extends Component {
           : "Password should at least 6 characters long, contains 1 lowercase, 1 uppercase and 1 special character!";
 
         specErrorCopy.password.matched =
-          value == this.state.password_confirm && this.state.password_confirm != ""
-            ? ""
-            : "Password not match!";
+          value != this.state.password_confirm && this.state.password_confirm != ""
+            ? "Password not match the password confirmation!"
+            : "";
 
         break;
       case "password_confirm":
@@ -93,7 +94,9 @@ class SignUp extends Component {
           : "Password should at least 6 characters long, contains 1 lowercase, 1 uppercase and 1 special character!";
 
         specErrorCopy.password_confirm.matched =
-          value == this.state.password && this.state.password != "" ? "" : "Password not match!";
+          value != this.state.password && this.state.password != ""
+            ? "Password confirmation not match the password!"
+            : "";
         break;
       default:
         break;
@@ -102,8 +105,8 @@ class SignUp extends Component {
     this.setState({ specError: specErrorCopy, [name]: value });
     /*     console.log(value);
     console.log(this.state.specError.fullname.long); */
-    console.log(specErrorCopy.username.spechar);
-    console.log(specErrorCopy.username.existed);
+    // console.log(specErrorCopy.username.spechar);
+    // console.log(specErrorCopy.username.existed);
   };
 
   createNewMember = e => {
@@ -202,6 +205,16 @@ class SignUp extends Component {
               placeholder="Password"
               onChange={this.handleChange}
             />
+            {password.contains.length > 0 && (
+              <span>
+                <br /> {password.contains}
+              </span>
+            )}
+            {password.matched.length > 0 && (
+              <span>
+                <br /> {password.matched}
+              </span>
+            )}
           </div>
 
           <div>
@@ -213,6 +226,16 @@ class SignUp extends Component {
               placeholder="Confirm password"
               onChange={this.handleChange}
             />
+            {password_confirm.contains.length > 0 && (
+              <span>
+                <br /> {password_confirm.contains}
+              </span>
+            )}
+            {password_confirm.matched.length > 0 && (
+              <span>
+                <br /> {password_confirm.matched}
+              </span>
+            )}
           </div>
 
           <input type="submit" value="Submit" />

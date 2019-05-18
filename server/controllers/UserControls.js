@@ -110,8 +110,8 @@ const delete_one = (req, res, message) => {
 // UPDATE ONE USER
 const update_one = (req, res) => {
   console.log("update_one");
-
-  if (!/.+\@.+\..+/.test(req.body.email) || req.body.email === req.userinfo.email) {
+  const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+  if (!emailRegex.test(req.body.email) || req.body.email === req.userinfo.email) {
     return res.status(400).json({
       error: "Email pattern should be valid and can't be the same as the already registered one!"
     });
@@ -150,12 +150,12 @@ const check_unique = (req, res) => {
 
   if (req.body.email) {
     field = { email: req.body.email };
-    fieldLabel = "email";
+    fieldLabel = "Email";
   }
 
   if (req.body.username) {
     field = { username: req.body.username };
-    fieldLabel = "username";
+    fieldLabel = "Username";
   }
 
   if (req.body.username || req.body.email) {
