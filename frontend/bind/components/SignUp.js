@@ -140,7 +140,7 @@ class SignUp extends Component {
               id="fullname"
               placeholder="Full name"
               onChange={this.handleChange}
-            />{" "}
+            />
             <br />
             {fullname.long.length > 0 && <span>{fullname.long}</span>}
           </div>
@@ -152,7 +152,7 @@ class SignUp extends Component {
               id="username"
               placeholder="Username"
               onChange={this.handleChange}
-            />{" "}
+            />
             {username.long.length > 0 && (
               <span>
                 <br />
@@ -180,7 +180,17 @@ class SignUp extends Component {
               placeholder="Email"
               onChange={this.handleChange}
               noValidate
-            />{" "}
+            />
+            {email.matched.length > 0 && (
+              <span>
+                <br /> {email.matched}
+              </span>
+            )}
+            {email.existed.length > 0 && (
+              <span>
+                <br /> {email.existed}
+              </span>
+            )}
           </div>
 
           <div>
@@ -191,7 +201,7 @@ class SignUp extends Component {
               id="password"
               placeholder="Password"
               onChange={this.handleChange}
-            />{" "}
+            />
           </div>
 
           <div>
