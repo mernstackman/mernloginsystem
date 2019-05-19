@@ -72,7 +72,8 @@ UserSchema.virtual("password_confirm")
 UserSchema.path("password_hash").validate(function(value) {
   if (this._password || this.passwordConfirm) {
     const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
-    if (passRegex.test(this._password)) {
+    if (!passRegex.test(this._password)) {
+      console.log(this._password);
       this.invalidate("password", "Password don't match the requirements!");
     }
 

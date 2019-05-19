@@ -1,16 +1,30 @@
 import React, { Component } from "react";
 import { signup, checkAvailability } from "./../../apis/user-api";
 /* 
-  This script is not yet completed. There several features that need to be added.
+This script is not yet completed. There several features that need to be added.
 */
+const isFormValid = state => {
+  const { specError, fullname, username, email, password, password_confirm } = { ...state };
+  let valid = true;
+  Object.values(specError).forEach(val => {
+    Object.values(val).forEach(v => {
+      v.length > 0 && (valid = false);
+    });
+    // console.log(val);
+  });
 
-/* const errMsg = {
-  fullname: { long: "Full name should be between 3 to 100 characters long." },
-  username: { long: "Username should be between 3 to 20 characters long.", exist: "" },
-  email: { match: "" },
-  password: { long: "", contains: "", match: "" },
-  password_confirm: { long: "", contains: "", match: "" }
-}; */
+  const fields = { fullname, username, email, password, password_confirm };
+  Object.values(fields).forEach(val => {
+    val == "" && (valid = false);
+  });
+  console.log(valid);
+  return valid;
+};
+
+const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+const mailRegex = /.+\@.+\..+/;
+const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
 
 class SignUp extends Component {
   state = {
@@ -28,18 +42,12 @@ class SignUp extends Component {
       password: { contains: "", matched: "" },
       password_confirm: { contains: "", matched: "" }
     },
-    globalError: false
+    canSubmit: false
   };
 
-  handleError = () => {};
-
   handleChange = e => {
+    const specErrorCopy = { ...this.state.specError };
     const { name, value } = e.target;
-    var specErrorCopy = { ...this.state.specError };
-    const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-    // const mailRegex = /.+\@.+\..+/;
-    const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
-    const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
     let data;
 
     let message = "";
@@ -69,7 +77,7 @@ class SignUp extends Component {
         });
         break;
       case "email":
-        specErrorCopy.email.matched = mailRegex.test(value) ? "" : "Please enter valid email!";
+        specErrorCopy.email.matched = emailRegex.test(value) ? "" : "Please enter valid email!";
 
         data = { email: value };
         checkAvailability(data).then(response => {
@@ -101,21 +109,18 @@ class SignUp extends Component {
       default:
         break;
     }
-
-    this.setState({ specError: specErrorCopy, [name]: value });
-    /*     console.log(value);
-    console.log(this.state.specError.fullname.long); */
-    // console.log(specErrorCopy.username.spechar);
-    // console.log(specErrorCopy.username.existed);
+    const canSubmit = isFormValid(this.state);
+    console.log(canSubmit);
+    this.setState({ specError: specErrorCopy, [name]: value, canSubmit });
   };
 
-  createNewMember = e => {
+  handleSubmit = e => {
     e.preventDefault();
-    // Check if there are error before submitting. Something check if there are error message under input field.
+    // Check if there are error before submitting. Something like check if there are error message under input field.
 
     const data = ({ fullname, username, email, password, password_confirm } = { ...this.state });
 
-    console.log(this.state);
+    // isFormValid(this.state);
 
     signup(data).then(response => {
       if (response.error) {
@@ -134,7 +139,7 @@ class SignUp extends Component {
     return (
       <div>
         {this.state.error && <p>{this.state.error.toString()}</p>}
-        <form onSubmit={this.createNewMember} noValidate>
+        <form onSubmit={this.handleSubmit} noValidate>
           <div>
             <label htmlFor="fullname">Name:</label> <br />
             <input
@@ -238,7 +243,7 @@ class SignUp extends Component {
             )}
           </div>
 
-          <input type="submit" value="Submit" />
+          <input type="submit" value="Submit" disabled={!this.state.canSubmit} />
         </form>
       </div>
     );
