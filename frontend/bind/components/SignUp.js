@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { signup, checkAvailability } from "./../../apis/user-api";
+import loading from "./../../img/loading.gif";
 /* 
 This script is not yet completed. There several features that need to be added.
 */
 const isFormValid = state => {
-  const { specError, fullname, username, email, password, password_confirm } = { ...state };
+  const { specError, username, email, password, password_confirm } = { ...state };
   let valid = true;
   Object.values(specError).forEach(val => {
     Object.values(val).forEach(v => {
@@ -13,7 +14,7 @@ const isFormValid = state => {
     // console.log(val);
   });
 
-  const fields = { fullname, username, email, password, password_confirm };
+  const fields = { username, email, password, password_confirm };
   Object.values(fields).forEach(val => {
     val == "" && (valid = false);
   });
@@ -42,7 +43,9 @@ class SignUp extends Component {
       password: { contains: "", matched: "" },
       password_confirm: { contains: "", matched: "" }
     },
-    canSubmit: false
+    canSubmit: false,
+    loading: false,
+    changing: ""
   };
 
   handleChange = e => {
@@ -50,17 +53,20 @@ class SignUp extends Component {
     const { name, value } = e.target;
     let data;
 
-    let message = "";
+    let changing = "";
     // Validate here
     switch (name) {
-      case "fullname":
+      /*       case "fullname":
         specErrorCopy.fullname.long =
           value.length > 100 || value.length < 3
             ? "Full name should be between 3 to 100 characters long."
             : "";
         console.log(specErrorCopy.fullname.long);
-        break;
+        break; */
       case "username":
+        //-> show loader
+        changing = "username";
+        this.setState({ changing });
         specErrorCopy.username.long =
           value.length > 20 || value.length < 3
             ? "Username should be between 3 to 20 characters long."
@@ -69,21 +75,31 @@ class SignUp extends Component {
           ? "Username cannot contain space or restricted special characters!"
           : "";
         // compare value with the available record using ...?
-        data = { username: value };
-        checkAvailability(data).then(response => {
-          specErrorCopy.username.existed = response.message;
-          this.setState({ specError: specErrorCopy });
-          console.log(response.message);
-        });
+        if (value != "") {
+          this.setState({ loading: true });
+
+          data = { username: value };
+          checkAvailability(data).then(response => {
+            specErrorCopy.username.existed = response.message;
+            this.setState({ specError: specErrorCopy, loading: false });
+            console.log(response.message);
+            //-> hide loader
+          });
+        }
         break;
       case "email":
+        changing = "email";
+        this.setState({ changing });
         specErrorCopy.email.matched = emailRegex.test(value) ? "" : "Please enter valid email!";
 
-        data = { email: value };
-        checkAvailability(data).then(response => {
-          specErrorCopy.email.existed = response.message;
-          this.setState({ specError: specErrorCopy });
-        });
+        if (value != "") {
+          this.setState({ loading: true });
+          data = { email: value };
+          checkAvailability(data).then(response => {
+            specErrorCopy.email.existed = response.message;
+            this.setState({ specError: specErrorCopy, loading: false });
+          });
+        }
         break;
       case "password":
         specErrorCopy.password.contains = passRegex.test(value)
@@ -149,18 +165,31 @@ class SignUp extends Component {
               placeholder="Full name"
               onChange={this.handleChange}
             />
-            <br />
-            {fullname.long.length > 0 && <span>{fullname.long}</span>}
+            {/* fullname.long.length > 0 && <span>{fullname.long}</span> */}
           </div>
+          <br />
           <div>
-            <label htmlFor="username">Username:</label> <br />
+            <label htmlFor="username">Username:</label> <span>*</span> <br />
             <input
               type="text"
               name="username"
               id="username"
               placeholder="Username"
               onChange={this.handleChange}
-            />
+            />{" "}
+            {this.state.loading && this.state.changing == "username" && <img src={loading} />}
+            {!this.state.loading &&
+              this.state.changing == "username" &&
+              username.long.length <= 0 &&
+              username.existed.length <= 0 &&
+              username.spechar.length <= 0 &&
+              "check" /* <img src={"checkmark"} /> */}
+            {((!this.state.loading &&
+              this.state.changing == "username" &&
+              username.long.length > 0) ||
+              username.existed.length > 0 ||
+              username.spechar.length > 0) &&
+              "x" /* <img src={"x"} /> */}
             {username.long.length > 0 && (
               <span>
                 <br />
@@ -178,9 +207,10 @@ class SignUp extends Component {
               </span>
             )}
           </div>
-
+          <br />
           <div>
-            <label htmlFor="email">Email:</label> <br />
+            <label htmlFor="email">Email:</label> <span>*</span>
+            <br />
             <input
               type="email"
               name="email"
@@ -188,7 +218,17 @@ class SignUp extends Component {
               placeholder="Email"
               onChange={this.handleChange}
               noValidate
-            />
+            />{" "}
+            {!this.state.loading &&
+              this.state.changing == "email" &&
+              email.matched.length <= 0 &&
+              email.existed.length <= 0 &&
+              "check" /* <img src={"checkmark"} /> */}
+            {!this.state.loading &&
+              this.state.changing == "email" &&
+              (email.matched.length > 0 || email.existed.length > 0) &&
+              "x" /* <img src={"x"} /> */}
+            {this.state.loading && this.state.changing == "email" && <img src={loading} />}
             {email.matched.length > 0 && (
               <span>
                 <br /> {email.matched}
@@ -200,9 +240,10 @@ class SignUp extends Component {
               </span>
             )}
           </div>
-
+          <br />
           <div>
-            <label htmlFor="password">Password:</label> <br />
+            <label htmlFor="password">Password:</label> <span>*</span>
+            <br />
             <input
               type="password"
               name="password"
@@ -221,9 +262,11 @@ class SignUp extends Component {
               </span>
             )}
           </div>
+          <br />
 
           <div>
-            <label htmlFor="password_confirm">Confirm password:</label> <br />
+            <label htmlFor="password_confirm">Confirm password:</label> <span>*</span>
+            <br />
             <input
               type="password"
               name="password_confirm"
@@ -242,7 +285,7 @@ class SignUp extends Component {
               </span>
             )}
           </div>
-
+          <br />
           <input type="submit" value="Submit" disabled={!this.state.canSubmit} />
         </form>
       </div>

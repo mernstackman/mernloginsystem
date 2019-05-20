@@ -11,7 +11,13 @@
     "dev-build": "rimraf dist && webpack --mode development --config webpack.config.server.js && webpack --config webpack.config.dev.js",
     "clean": "rimraf dist"
   },
-  "keywords": [],
+  "keywords": [
+    "mern",
+    "login system",
+    "signup",
+    "registration",
+    "membership"
+  ],
   "author": "Ari Susanto",
   "license": "MIT",
   "dependencies": {
