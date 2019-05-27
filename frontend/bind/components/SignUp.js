@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { signup, checkAvailability } from "./../../apis/user-api";
 import loading from "./../../img/loading.gif";
+import hasher from "./../../../functions/hasher";
+
 /* 
 This script is not yet completed. There several features that need to be added.
 */
@@ -27,6 +29,8 @@ const mailRegex = /.+\@.+\..+/;
 const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
 const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
 
+// -------------------------------------------------------------------------------
+
 class SignUp extends Component {
   state = {
     fullname: "",
@@ -36,16 +40,17 @@ class SignUp extends Component {
     password_confirm: "",
     open: false,
     error: "",
+    canSubmit: false,
+    loading: false,
+    changing: "",
+    // sendingEmail: false,
     specError: {
       fullname: { long: "" },
       username: { long: "", existed: "", spechar: "" },
       email: { matched: "", existed: "" },
       password: { contains: "", matched: "" },
       password_confirm: { contains: "", matched: "" }
-    },
-    canSubmit: false,
-    loading: false,
-    changing: ""
+    }
   };
 
   handleChange = e => {
@@ -135,9 +140,11 @@ class SignUp extends Component {
     // Check if there are error before submitting. Something like check if there are error message under input field.
 
     const data = ({ fullname, username, email, password, password_confirm } = { ...this.state });
+    const mailToken = hasher.createHash(data.email);
 
+    data["mailToken"] = mailToken;
     // isFormValid(this.state);
-
+    console.log(data);
     signup(data).then(response => {
       if (response.error) {
         console.log(response.error);
@@ -145,7 +152,7 @@ class SignUp extends Component {
           error: "Something went wrong! Please re-check the info you supplied!"
         });
       }
-      this.setState({ error: "", open: true });
+      this.setState({ error: "", open: true /* sendingEmail: true */ });
     });
   };
 

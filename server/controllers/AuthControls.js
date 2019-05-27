@@ -53,10 +53,6 @@ const sign_in = (req, res) => {
       updated: result.updated,
       updateCount: result.updateCount
     };
-    /*     console.log(result);
-    output["created"] = null;
-    output["salt"] = null;
-    output["password_hash"] = null; */
     res.json({ token, loggedIn_user: output });
   });
 };
@@ -83,4 +79,6 @@ const currentUserOnly = (req, res, next) => {
   next();
 };
 
-export default { sign_in, sign_out, signedInOnly, currentUserOnly };
+const verifyEmail = () => {};
+
+export default { sign_in, sign_out, signedInOnly, currentUserOnly, verifyEmail };

@@ -1,12 +1,14 @@
 /* Called in UserControl.js */
 import mongoose from "mongoose";
 import crypto from "crypto";
+import hasher from "./../../functions/hasher";
 // import dateFormat from "dateformat";
 
 mongoose.set("useCreateIndex", true);
 
 const Schema = mongoose.Schema;
 const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+
 const UserSchema = new Schema({
   fullname: {
     type: String,
@@ -31,13 +33,18 @@ const UserSchema = new Schema({
     unique: true,
     required: true
   },
+  confirmed: {
+    type: Boolean,
+    default: false
+  },
   salt: String,
   created: {
     type: Date,
     default: new Date()
   },
   updated: Date,
-  updateCount: { type: Number, default: 0 }
+  updateCount: { type: Number, default: 0 },
+  mailToken: { type: String, default: "" }
 });
 
 // Create virtual data of UserSchema for input field with the named password and obfuscate its value
@@ -45,9 +52,9 @@ UserSchema.virtual("password")
   .set(function(value) {
     this._password = value;
     // generate salt for password hashing
-    this.salt = this.createSalt();
+    // this.salt = this.createSalt();
     // Use salt along with the password to create password_hash
-    this.password_hash = this.hashThePassword(value);
+    this.password_hash = hasher.createHash(value);
   })
   .get(function() {
     this._password;
@@ -106,19 +113,7 @@ UserSchema.path("username").validate(function(value) {
 UserSchema.methods = {
   comparePassword: function(loginPassword) {
     if (!this.password_hash) return null;
-    return this.hashThePassword(loginPassword) === this.password_hash;
-  },
-  hashThePassword: function(password) {
-    // Use bcrypt for better login authentication
-    const hash = crypto
-      .createHmac("sha256", this.salt)
-      .update(password)
-      .digest("hex");
-
-    return hash;
-  },
-  createSalt: function() {
-    return Math.round(new Date().valueOf() * Math.random()) + "$";
+    return hasher.createHash(loginPassword) === this.password_hash;
   }
 };
 

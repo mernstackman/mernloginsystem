@@ -37,8 +37,10 @@ const list = (req, res) => {
 };
 
 // CLEAN ALL USERS
-const clean_all = (req, res) => {
-  return UserModel.deleteMany({}, (err, users) => {});
+const clean_all = (req, res, next) => {
+  return UserModel.deleteMany({}, (err, users) => {}).then(() => {
+    next();
+  });
 };
 
 // GET SELECTED USER'S DATA TO BE USED ON THE NEXT MIDDLEWARE
