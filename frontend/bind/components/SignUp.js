@@ -162,6 +162,10 @@ class SignUp extends Component {
     return (
       <div>
         {this.state.error && <p>{this.state.error.toString()}</p>}
+        {!this.state.error && (
+          <p>Please check your email's inbox or spam folder for the confirmation instruction!</p>
+        )}
+
         <form onSubmit={this.handleSubmit} noValidate>
           <div>
             <label htmlFor="fullname">Name:</label> <br />

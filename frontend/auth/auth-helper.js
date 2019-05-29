@@ -1,4 +1,4 @@
-import { signout } from "./user-auth";
+import auths from "./user-auth";
 
 const auth = {
   isLoggedIn() {
@@ -12,7 +12,7 @@ const auth = {
   signOut(callback) {
     if (typeof window !== "undefined") sessionStorage.removeItem("jwt");
     callback();
-    signout().then(data => {
+    auths.signout().then(data => {
       document.cookie = "usin=; expires=Thu, 01 Jan 1970 00:00:00 UT; path=/;";
     });
   }

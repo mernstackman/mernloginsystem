@@ -24,4 +24,23 @@ const signout = () => {
     .catch(e => console.log(e));
 };
 
-export { signin, signout };
+// To be called on the front end
+// Get from front end and send it to backend
+const verify = data => {
+  return fetch("/email/verify/" + data.emailToken, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(() => {
+      return response.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+const auths = { signin, signout, verify };
+export default auths;

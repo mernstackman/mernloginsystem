@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { Link, Redirect } from "react-router-dom";
-import { signin } from "./../../auth/user-auth";
+import auths from "./../../auth/user-auth";
 
 class SignIn extends Component {
   state = {
@@ -12,6 +12,7 @@ class SignIn extends Component {
   };
 
   handleChange = e => {
+    // console.log(signin);
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -24,8 +25,7 @@ class SignIn extends Component {
       user: this.state.user,
       password: this.state.password
     };
-
-    signin(data).then(result => {
+    auths.signin(data).then(result => {
       if (result.Error) {
         console.log(result);
         return this.setState({ error: result.Error }); // If error happen, change this

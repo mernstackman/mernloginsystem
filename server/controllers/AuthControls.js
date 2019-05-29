@@ -8,7 +8,6 @@ const sign_in = (req, res) => {
   const regex = /.+\@.+\..+/;
   let user = {};
   let enteredID = "";
-
   if (regex.test(req.body.user)) {
     user = { email: req.body.user };
     enteredID = "email";
@@ -79,6 +78,38 @@ const currentUserOnly = (req, res, next) => {
   next();
 };
 
-const verifyEmail = () => {};
+const emailtoken = (req, res, next, token) => {
+  UserModel.findOne({ emailToken: token }).exec((err, user) => {
+    if (err) {
+      return res.status(400).json({
+        Error: "Email token is expired!"
+      });
+    }
+    req.userinfo = user;
+  });
+  next();
+};
 
-export default { sign_in, sign_out, signedInOnly, currentUserOnly, verifyEmail };
+// Request data from model and then pass it through url/ route
+const verifyEmail = (req, res, next) => {
+  console.log(req.userinfo);
+  console.log(req.body);
+  // check if token present in the url
+  // compare token
+  // delete token
+};
+
+const updateEmailToken = () => {};
+
+const expireEmailToken = () => {};
+
+export default {
+  sign_in,
+  sign_out,
+  signedInOnly,
+  currentUserOnly,
+  emailtoken,
+  verifyEmail,
+  updateEmailToken,
+  expireEmailToken
+};

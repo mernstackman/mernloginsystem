@@ -52,7 +52,7 @@ UserSchema.virtual("password")
   .set(function(value) {
     this._password = value;
     // generate salt for password hashing
-    // this.salt = this.createSalt();
+    this.salt = hasher.createSalt();
     // Use salt along with the password to create password_hash
     this.password_hash = hasher.createHash(value);
   })
@@ -113,7 +113,8 @@ UserSchema.path("username").validate(function(value) {
 UserSchema.methods = {
   comparePassword: function(loginPassword) {
     if (!this.password_hash) return null;
-    return hasher.createHash(loginPassword) === this.password_hash;
+    console.log(hasher.createHash(loginPassword, this.salt));
+    return hasher.createHash(loginPassword, this.salt) === this.password_hash;
   }
 };
 
