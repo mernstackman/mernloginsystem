@@ -1,6 +1,6 @@
 /* Called in UserControl.js */
 import mongoose from "mongoose";
-import crypto from "crypto";
+// import crypto from "crypto";
 import hasher from "./../../functions/hasher";
 // import dateFormat from "dateformat";
 
@@ -55,7 +55,7 @@ UserSchema.virtual("password")
     // generate salt for password hashing
     this.salt = hasher.createSalt();
     // Use salt along with the password to create password_hash
-    this.password_hash = hasher.createHash(value);
+    this.password_hash = hasher.createHash(value, this.salt);
   })
   .get(function() {
     this._password;

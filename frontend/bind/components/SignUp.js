@@ -138,12 +138,14 @@ class SignUp extends Component {
   handleSubmit = e => {
     e.preventDefault();
     // Check if there are error before submitting. Something like check if there are error message under input field.
-
+    // console.log(typeof salt !== "undefined");
+    // salt.toString();
     const { fullname, username, email, password, password_confirm } = { ...this.state };
 
-    console.log("test");
+    // console.log("test");
     const mailSalt = hasher.createSalt();
-    const mailToken = hasher.createHash(data.email, mailSalt);
+    // console.log(mailSalt);
+    const mailToken = hasher.createHash(email, mailSalt);
 
     const data = { fullname, username, email, password, password_confirm, mailSalt, mailToken };
     // isFormValid(this.state);
