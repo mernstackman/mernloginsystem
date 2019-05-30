@@ -38,6 +38,7 @@ const UserSchema = new Schema({
     default: false
   },
   salt: String,
+  mailSalt: String,
   created: {
     type: Date,
     default: new Date()

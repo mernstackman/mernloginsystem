@@ -1,9 +1,9 @@
 import crypto from "crypto";
 
 const createHash = (string, salt) => {
-  const thesalt = typeof salt !== undefined ? salt : createSalt();
+  salt = typeof salt !== undefined ? createSalt() : salt;
   const hash = crypto
-    .createHmac("sha256", thesalt)
+    .createHmac("sha256", salt)
     .update(string)
     .digest("hex");
 

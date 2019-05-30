@@ -8,6 +8,7 @@ import _ from "lodash";
 
 // CREATE USER
 const create = (req, res, next) => {
+  // console.log(req.body);
   const user = new UserModel(req.body);
 
   // Required validation
@@ -21,6 +22,7 @@ const create = (req, res, next) => {
       message: "Saved to database!"
     });
   });
+  // next();
 };
 
 // LIST USER

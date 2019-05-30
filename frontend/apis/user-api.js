@@ -1,6 +1,7 @@
 const signup = data => {
   console.log("from user-api.js");
   //   return "from user-api.js";
+  // console.log(JSON.parse(data));
   return fetch("/api/users", {
     method: "POST",
     headers: {

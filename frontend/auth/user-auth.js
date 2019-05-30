@@ -35,7 +35,7 @@ const verify = data => {
     },
     body: JSON.stringify(data)
   })
-    .then(() => {
+    .then(response => {
       return response.json();
     })
     .catch(err => {

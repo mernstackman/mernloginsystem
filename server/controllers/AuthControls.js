@@ -86,8 +86,8 @@ const emailtoken = (req, res, next, token) => {
       });
     }
     req.userinfo = user;
+    next();
   });
-  next();
 };
 
 // Request data from model and then pass it through url/ route

@@ -18,7 +18,7 @@ class Verify extends Component {
   };
 
   render() {
-    return <div />;
+    return <div>Verify</div>;
   }
 }
 
