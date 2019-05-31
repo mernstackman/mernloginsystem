@@ -27,7 +27,8 @@ const signout = () => {
 // To be called on the front end
 // Get from front end and send it to backend
 const verify = data => {
-  return fetch("/email/verify/" + data.emailToken, {
+  const emailToken = data.emailToken ? data.emailToken : "";
+  return fetch("/email/verify/" + emailToken, {
     method: "POST",
     headers: {
       Accept: "application/json",

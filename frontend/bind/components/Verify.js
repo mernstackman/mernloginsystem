@@ -9,12 +9,14 @@ class Verify extends Component {
   }
 
   componentWillReceiveProps = props => {
-    console.log(props.match.params.emailtoken);
-    auths.verify({ emailToken: props.match.params.emailtoken });
+    console.log(props.match.params.emailtoken); // if this present/ !undefined
+    auths.verify({ emailToken: props.match.params.emailtoken }); // do this
+    // else execute it on form submission
   };
   componentDidMount = () => {
-    console.log(this.match.params.emailtoken);
-    auths.verify({ emailToken: this.match.params.emailtoken });
+    console.log(this.match.params.emailtoken); // if this present/ !undefined
+    auths.verify({ emailToken: this.match.params.emailtoken }); // do this
+    // else execute it on form submission
   };
 
   render() {

@@ -61,13 +61,12 @@ class SignUp extends Component {
     let changing = "";
     // Validate here
     switch (name) {
-      /*       case "fullname":
+      case "fullname":
         specErrorCopy.fullname.long =
           value.length > 100 || value.length < 3
             ? "Full name should be between 3 to 100 characters long."
             : "";
-        console.log(specErrorCopy.fullname.long);
-        break; */
+        break;
       case "username":
         //-> show loader
         changing = "username";
@@ -138,8 +137,6 @@ class SignUp extends Component {
   handleSubmit = e => {
     e.preventDefault();
     // Check if there are error before submitting. Something like check if there are error message under input field.
-    // console.log(typeof salt !== "undefined");
-    // salt.toString();
     const { fullname, username, email, password, password_confirm } = { ...this.state };
 
     // console.log("test");
@@ -181,7 +178,7 @@ class SignUp extends Component {
               placeholder="Full name"
               onChange={this.handleChange}
             />
-            {/* fullname.long.length > 0 && <span>{fullname.long}</span> */}
+            {fullname.long.length > 0 && <span>{fullname.long}</span>}
           </div>
           <br />
           <div>

@@ -11,10 +11,7 @@ import Members from "./components/Members";
 import Profile from "./components/Profile";
 import Signout from "./components/SignOut";
 import DeletePage from "./components/DeletePage";
-/* import Verify from "./components/Verify"; */
-/* 
-import EditProfile from "./components/EditProfile";
-*/
+import Verify from "./components/Verify";
 
 class MainRouter extends Component {
   render() {
@@ -30,10 +27,9 @@ class MainRouter extends Component {
           <Route path="/register" component={Register} />
           <Route path="/members" component={Members} />
           <Route path="/profile/:user_id" component={Profile} />
-          {/* <Route path="/email/verify/:emailtoken" component={Verify} /> */}
-          {/*
-          <Route path="/profile/edit/:id" component={EditProfile} />
-        */}
+          {<Route path="/email/verify/:emailtoken" component={Verify} />}
+          {<Route path="/email/verify" component={Verify} />}
+
           <Route path="/signout" component={Signout} />
           <Route path="/deleted" component={DeletePage} />
         </Switch>

@@ -2,6 +2,7 @@ import { UserModel, UserModel_deleted } from "./../models/UserModel";
 import jwt from "jsonwebtoken";
 import express_jwt from "express-jwt";
 import config from "./../../config";
+import _ from "lodash";
 
 /* SIGN IN */
 const sign_in = (req, res) => {
@@ -79,7 +80,7 @@ const currentUserOnly = (req, res, next) => {
 };
 
 const emailtoken = (req, res, next, token) => {
-  UserModel.findOne({ emailToken: token }).exec((err, user) => {
+  UserModel.findOne({ mailToken: token }).exec((err, user) => {
     if (err) {
       return res.status(400).json({
         Error: "Email token is expired!"
@@ -93,10 +94,44 @@ const emailtoken = (req, res, next, token) => {
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
   console.log(req.userinfo);
-  console.log(req.body);
   // check if token present in the url
+  if (!req.userinfo || (Object.keys(req.body).length === 0 && req.body.constructor === Object)) {
+    console.log("Not enough data is supplied!");
+    return res.status(400).json({
+      error: "Not enough data is supplied!"
+    });
+  }
+  if (req.userinfo.confirmed) {
+    return res.status(400).json({
+      message: "This user is verified."
+    });
+  }
+  const user = req.userinfo;
   // compare token
-  // delete token
+  if (req.userinfo.mailToken === req.body.emailToken) {
+    // delete token
+    // activate user if valid
+    let updateCount = user.updateCount;
+    updateCount += 1;
+    const updated = new Date();
+    console.log(user.updateCount);
+    const update = { confirmed: true, updateCount, updated };
+
+    UserModel.findOneAndUpdate(
+      { _id: user._id },
+      { $set: update },
+      { upsert: true, new: true },
+      (err, updated) => {
+        if (err) {
+          return res.status(400).json({
+            error: "There are problem when attempting to update this user!"
+          });
+        }
+
+        return res.status(200).json(updated);
+      }
+    );
+  }
 };
 
 const updateEmailToken = () => {};
