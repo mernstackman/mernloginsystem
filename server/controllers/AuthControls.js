@@ -93,17 +93,16 @@ const emailtoken = (req, res, next, token) => {
 
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
-  console.log(req.userinfo);
+  // console.log(req.userinfo);
   // check if token present in the url
   if (!req.userinfo || (Object.keys(req.body).length === 0 && req.body.constructor === Object)) {
-    console.log("Not enough data is supplied!");
     return res.status(400).json({
       error: "Not enough data is supplied!"
     });
   }
   if (req.userinfo.confirmed) {
     return res.status(400).json({
-      message: "This user is verified."
+      error: "This user is verified."
     });
   }
   const user = req.userinfo;
@@ -114,7 +113,7 @@ const verifyEmail = (req, res, next) => {
     let updateCount = user.updateCount;
     updateCount += 1;
     const updated = new Date();
-    console.log(user.updateCount);
+    // console.log(user.updateCount);
     const update = { confirmed: true, updateCount, updated };
 
     UserModel.findOneAndUpdate(
@@ -128,7 +127,7 @@ const verifyEmail = (req, res, next) => {
           });
         }
 
-        return res.status(200).json(updated);
+        return res.status(200).json({ updated, success: "Verification succeed!" });
       }
     );
   }

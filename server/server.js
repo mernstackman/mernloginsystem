@@ -5,11 +5,15 @@ const PORT = process.env.PORT || 3000;
 const mongoClientURI =
   process.env.MONGODB_URI ||
   process.env.MONGO_HOST ||
-  "mongodb://" + (process.env.IP || "localhost") + ":" + (process.env.MONGO_PORT || "27017") + "/mernloginsystem";
+  "mongodb://" +
+    (process.env.IP || "localhost") +
+    ":" +
+    (process.env.MONGO_PORT || "27017") +
+    "/mernloginsystem";
 
 /* CONNECT TO MONGODB */
 const db = mongoose.connect;
-db(mongoClientURI);
+db(mongoClientURI, { useNewUrlParser: true });
 mongoose.connection
   .on("error", () => {
     throw new Error(`Unable to connect to ${mongoClientURI}`);
