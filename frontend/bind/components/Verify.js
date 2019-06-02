@@ -11,14 +11,15 @@ class Verify extends Component {
       emailToken: "",
       useParam: false,
       message: "",
-      error: false
+      error: false,
+      loading: false
     };
     this.match = match;
   }
   componentWillReceiveProps = props => {
     if (props.match.params.emailtoken) {
       // if this present/ !undefined
-      this.setState({ emailToken: props.match.params.emailtoken, useParam: true });
+      this.setState({ emailToken: props.match.params.emailtoken, useParam: true, loading: true });
     }
     // auths.verify({ emailToken: props.match.params.emailtoken }); // do this
     // else execute it on form submission
@@ -26,7 +27,7 @@ class Verify extends Component {
   componentDidMount = () => {
     if (this.match.params.emailtoken) {
       // if this present/ !undefined
-      this.setState({ emailToken: this.match.params.emailtoken, useParam: true });
+      this.setState({ emailToken: this.match.params.emailtoken, useParam: true, loading: true });
     }
     // auths.verify({ emailToken: this.match.params.emailtoken }); // do this
     // else execute it on form submission
@@ -39,26 +40,31 @@ class Verify extends Component {
     });
   };
 
-  handleSubmit = e => {
-    if (!this.state.useParam) e.preventDefault();
-
+  verifyEmail = () => {
     const data = { emailToken: this.state.emailToken };
     return auths.verify(data).then(response => {
       if (response.error) {
-        this.setState({ message: response.error, error: true });
+        this.setState({ message: response.error, error: true, loading: false });
       } else if (response.success) {
-        this.setState({ message: response.success, error: false });
+        this.setState({ message: response.success, error: false, loading: false });
       }
       console.log(this.state.message);
     });
   };
 
+  handleSubmit = e => {
+    if (!this.state.useParam) e.preventDefault();
+    this.setState({ loading: true });
+    this.verifyEmail();
+  };
+
   render() {
-    const { emailToken, useParam, message } = { ...this.state };
-    emailToken != "" && useParam && message == "" && this.handleSubmit();
+    const { emailToken, useParam, message, loading, error } = { ...this.state };
+    emailToken != "" && useParam && message == "" && this.verifyEmail();
 
     return (
       <div>
+        {loading && "progress indicator"}
         {message != "" && message}
         {!useParam && (
           <form onSubmit={this.handleSubmit} noValidate>
