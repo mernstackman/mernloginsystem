@@ -91,43 +91,69 @@ const emailtoken = (req, res, next, token) => {
   });
 };
 
+const testMailToken = (req, res) => {};
+
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
   // console.log(req.userinfo);
   // check if token present in the url
-  if (!req.userinfo || (Object.keys(req.body).length === 0 && req.body.constructor === Object)) {
+  if (!req.userinfo) {
+    return res.status(400).json({
+      error: "The verification token is not valid. Please register first!",
+      norecord: true
+    });
+  }
+
+  if (Object.keys(req.body).length === 0 && req.body.constructor === Object) {
     return res.status(400).json({
       error: "Not enough data is supplied!"
     });
   }
-  if (req.userinfo.confirmed) {
+
+  const user = req.userinfo;
+
+  if (user.confirmed) {
     return res.status(400).json({
       error: "This user is verified."
     });
   }
-  const user = req.userinfo;
+
+  // Check for token expiration (substract date) <---
+  const currentDate = new Date();
+  const tokenAge = (Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60)) % 24;
+  if (tokenAge >= 24) {
+    return res.status(400).json({
+      error: "Token expired!"
+    });
+  }
+
+  /* console.log(tokenAge);
+  console.log(user.tokenCreation.getTime());
+  console.log(
+    Math.abs(currentDate.getTime() - new Date(user.tokenCreation.toString()).getTime()),
+    1
+  );
+  console.log(Math.abs(currentDate.getTime() - user.tokenCreation.getTime()), 2);
+  console.log(Math.abs(currentDate - user.tokenCreation), 3);
+  console.log(tokenAge >= 0.5); */
+
   // compare token
-  if (req.userinfo.mailToken === req.body.emailToken) {
-    // delete token
-    // activate user if valid
-    let updateCount = user.updateCount;
-    updateCount += 1;
-    const updated = new Date();
-    // console.log(user.updateCount);
-    const update = { confirmed: true, updateCount, updated };
+  // activate user if valid
+  if (user.mailToken === req.body.emailToken) {
+    const activation = { confirmed: true, userActivation: currentDate };
 
     UserModel.findOneAndUpdate(
       { _id: user._id },
-      { $set: update },
+      { $set: activation },
       { upsert: true, new: true },
-      (err, updated) => {
+      (err, activated) => {
         if (err) {
           return res.status(400).json({
             error: "There are problem when attempting to update this user!"
           });
         }
 
-        return res.status(200).json({ updated, success: "Verification succeed!" });
+        return res.status(200).json({ activated, success: "Verification succeed!" });
       }
     );
   }
@@ -137,6 +163,8 @@ const updateEmailToken = () => {};
 
 const expireEmailToken = () => {};
 
+const sendEmailToken = () => {};
+
 export default {
   sign_in,
   sign_out,
@@ -145,5 +173,6 @@ export default {
   emailtoken,
   verifyEmail,
   updateEmailToken,
-  expireEmailToken
+  expireEmailToken,
+  sendEmailToken
 };

@@ -139,12 +139,19 @@ class SignUp extends Component {
     // Check if there are error before submitting. Something like check if there are error message under input field.
     const { fullname, username, email, password, password_confirm } = { ...this.state };
 
-    // console.log("test");
     const mailSalt = hasher.createSalt();
-    // console.log(mailSalt);
     const mailToken = hasher.createHash(email, mailSalt);
-
-    const data = { fullname, username, email, password, password_confirm, mailSalt, mailToken };
+    const tokenCreation = new Date();
+    const data = {
+      fullname,
+      username,
+      email,
+      password,
+      password_confirm,
+      mailSalt,
+      mailToken,
+      tokenCreation
+    };
     // isFormValid(this.state);
     console.log(data);
     signup(data).then(response => {
@@ -299,7 +306,7 @@ class SignUp extends Component {
             )}
           </div>
           <br />
-          <input type="submit" value="Submit" disabled={/* !this.state.canSubmit */ false} />
+          <input type="submit" value="Submit" disabled={!this.state.canSubmit} />
         </form>
       </div>
     );

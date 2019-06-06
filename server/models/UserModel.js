@@ -37,15 +37,20 @@ const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
-  salt: String,
-  mailSalt: String,
   created: {
     type: Date,
     default: new Date()
   },
+  salt: String,
+  mailSalt: String,
   updated: Date,
   updateCount: { type: Number, default: 0 },
-  mailToken: { type: String, default: "" }
+  mailToken: { type: String, default: "" },
+  tokenCreation: {
+    type: Date,
+    default: new Date()
+  },
+  userActivation: Date
 });
 
 // Create virtual data of UserSchema for input field with the named password and obfuscate its value

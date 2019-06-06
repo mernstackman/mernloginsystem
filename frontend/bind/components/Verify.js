@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import auths from "./../../auth/user-auth";
-import { format } from "path";
-
-const verifyEmail = emailToken => {};
+import { Link } from "react-router-dom";
 
 class Verify extends Component {
   constructor({ match }) {
@@ -21,16 +19,12 @@ class Verify extends Component {
       // if this present/ !undefined
       this.setState({ emailToken: props.match.params.emailtoken, useParam: true, loading: true });
     }
-    // auths.verify({ emailToken: props.match.params.emailtoken }); // do this
-    // else execute it on form submission
   };
   componentDidMount = () => {
     if (this.match.params.emailtoken) {
       // if this present/ !undefined
       this.setState({ emailToken: this.match.params.emailtoken, useParam: true, loading: true });
     }
-    // auths.verify({ emailToken: this.match.params.emailtoken }); // do this
-    // else execute it on form submission
   };
 
   handleChange = e => {
@@ -40,16 +34,30 @@ class Verify extends Component {
     });
   };
 
+  requestNewCode = e => {
+    e.preventDefault();
+    // Check if token valid - if not, show submit form to enter email address
+    // if email not recorded, ask user to register.
+    // Get user's email with the supplied token
+    // Create new email token using different salt
+    // Update the database record
+    // Send to the user's email
+    // Hide link
+    console.log("Test");
+  };
+
   verifyEmail = () => {
     const data = { emailToken: this.state.emailToken };
-    return auths.verify(data).then(response => {
-      if (response.error) {
+    auths.verify(data).then(response => {
+      if (response.error && !response.norecord) {
         this.setState({ message: response.error, error: true, loading: false });
       } else if (response.success) {
         this.setState({ message: response.success, error: false, loading: false });
+      } else if (response.norecord) {
+        this.setState({ message: response.error, error: true, loading: false });
       }
-      console.log(this.state.message);
     });
+    console.log(this.state.message);
   };
 
   handleSubmit = e => {
@@ -59,7 +67,7 @@ class Verify extends Component {
   };
 
   render() {
-    const { emailToken, useParam, message, loading, error } = { ...this.state };
+    const { emailToken, useParam, message, loading, error, norecord } = { ...this.state };
     emailToken != "" && useParam && message == "" && this.verifyEmail();
 
     return (
@@ -75,6 +83,13 @@ class Verify extends Component {
             <br />
             <input type="submit" value="Submit" />
           </form>
+        )}
+        {message.includes("expired!") && (
+          <div>
+            <Link to="" onClick={this.requestNewCode}>
+              Request new verification code
+            </Link>
+          </div>
         )}
       </div>
     );
