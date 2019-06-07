@@ -162,6 +162,7 @@ class SignUp extends Component {
         });
       }
       this.setState({ error: "", open: true /* sendingEmail: true */ });
+      this.props.history.push("/email/verify", { email });
     });
   };
 

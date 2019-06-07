@@ -36,9 +36,10 @@ class Verify extends Component {
 
   requestNewCode = e => {
     e.preventDefault();
-    // Check if token valid - if not, show submit form to enter email address
-    // if email not recorded, ask user to register.
-    // Get user's email with the supplied token
+    // Get email from history or using supplied token
+    if (this.props.location.state) {
+      console.log(this.props.location.state.email);
+    }
     // Create new email token using different salt
     // Update the database record
     // Send to the user's email
@@ -48,7 +49,7 @@ class Verify extends Component {
 
   verifyEmail = () => {
     const data = { emailToken: this.state.emailToken };
-    auths.verify(data).then(response => {
+    return auths.verify(data).then(response => {
       if (response.error && !response.norecord) {
         this.setState({ message: response.error, error: true, loading: false });
       } else if (response.success) {
@@ -56,8 +57,8 @@ class Verify extends Component {
       } else if (response.norecord) {
         this.setState({ message: response.error, error: true, loading: false });
       }
+      console.log(this.state.message);
     });
-    console.log(this.state.message);
   };
 
   handleSubmit = e => {
@@ -69,7 +70,11 @@ class Verify extends Component {
   render() {
     const { emailToken, useParam, message, loading, error, norecord } = { ...this.state };
     emailToken != "" && useParam && message == "" && this.verifyEmail();
-
+    let email = "";
+    if (this.props.location.state) {
+      email = this.props.location.state.email;
+    }
+    if (email) console.log(email);
     return (
       <div>
         {loading && "progress indicator"}
@@ -84,7 +89,7 @@ class Verify extends Component {
             <input type="submit" value="Submit" />
           </form>
         )}
-        {message.includes("expired!") && (
+        {(message.includes("expired!") || email) && (
           <div>
             <Link to="" onClick={this.requestNewCode}>
               Request new verification code
