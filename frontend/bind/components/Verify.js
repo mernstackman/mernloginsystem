@@ -10,7 +10,8 @@ class Verify extends Component {
       useParam: false,
       message: "",
       error: false,
-      loading: false
+      loading: false,
+      email: ""
     };
     this.match = match;
   }
@@ -37,8 +38,21 @@ class Verify extends Component {
   requestNewCode = e => {
     e.preventDefault();
     // Get email from history or using supplied token
+    let email = "";
     if (this.props.location.state) {
-      console.log(this.props.location.state.email);
+      email = this.props.location.state.email;
+    }
+    if (!this.props.location.state && this.state.emailToken != "") {
+      this.state.emailToken;
+      auths.getEmail({ emailToken: this.state.emailToken }).then(response => {
+        if (response.email) {
+          email = response.email;
+        }
+      });
+    }
+    if (email) {
+      return console.log("email exist!");
+      this.setState({ email });
     }
     // Create new email token using different salt
     // Update the database record
@@ -68,6 +82,7 @@ class Verify extends Component {
   };
 
   render() {
+    if (this.state.emailToken) console.log(this.state.emailToken, "X");
     const { emailToken, useParam, message, loading, error, norecord } = { ...this.state };
     emailToken != "" && useParam && message == "" && this.verifyEmail();
     let email = "";

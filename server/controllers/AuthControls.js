@@ -80,6 +80,7 @@ const currentUserOnly = (req, res, next) => {
 };
 
 const emailtoken = (req, res, next, token) => {
+  // console.log(token);
   UserModel.findOne({ mailToken: token }).exec((err, user) => {
     if (err) {
       return res.status(400).json({
@@ -89,6 +90,16 @@ const emailtoken = (req, res, next, token) => {
     req.userinfo = user;
     next();
   });
+};
+
+const mailFromToken = (req, res, next) => {
+  // console.log(req.userinfo);
+  if (!req.userinfo) {
+    return res.json({
+      error: "No user found!"
+    });
+  }
+  return res.json({ email: req.userinfo.email });
 };
 
 const testMailToken = (req, res) => {};
@@ -112,7 +123,7 @@ const verifyEmail = (req, res, next) => {
 
   const user = req.userinfo;
 
-  if (user.confirmed) {
+  /*     if (user.confirmed) {
     return res.status(400).json({
       error: "This user is verified."
     });
@@ -125,9 +136,18 @@ const verifyEmail = (req, res, next) => {
     return res.status(400).json({
       error: "Token expired!"
     });
-  }
+  } */
 
-  /* console.log(tokenAge);
+  // Check for token expiration (substract date) <---
+  const currentDate = new Date();
+  const tokenAge = Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60);
+  console.log(tokenAge);
+  if (tokenAge >= 20) {
+    return res.status(400).json({
+      error: "Token expired!"
+    });
+  }
+  /* 
   console.log(user.tokenCreation.getTime());
   console.log(
     Math.abs(currentDate.getTime() - new Date(user.tokenCreation.toString()).getTime()),
@@ -172,6 +192,7 @@ export default {
   currentUserOnly,
   emailtoken,
   verifyEmail,
+  mailFromToken,
   updateEmailToken,
   expireEmailToken,
   sendEmailToken
