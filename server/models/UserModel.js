@@ -7,7 +7,10 @@ import hasher from "./../../functions/hasher";
 mongoose.set("useCreateIndex", true);
 
 const Schema = mongoose.Schema;
+
 const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
+const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
+const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
 
 const UserSchema = new Schema({
   fullname: {
@@ -46,10 +49,7 @@ const UserSchema = new Schema({
   updated: Date,
   updateCount: { type: Number, default: 0 },
   mailToken: { type: String, default: "" },
-  tokenCreation: {
-    type: Date,
-    default: new Date()
-  },
+  tokenCreation: Date,
   userActivation: Date
 });
 
@@ -84,7 +84,6 @@ UserSchema.virtual("password_confirm")
 // -?test-> check what happens if validate is applied to virtual path named password
 UserSchema.path("password_hash").validate(function(value) {
   if (this._password || this.passwordConfirm) {
-    const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
     if (!passRegex.test(this._password)) {
       console.log(this._password);
       this.invalidate("password", "Password don't match the requirements!");
@@ -109,7 +108,6 @@ UserSchema.path("fullname").validate(function(value) {
 
 // Validate username
 UserSchema.path("username").validate(function(value) {
-  const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
   if (userRegex.test(value)) {
     this.invalidate("username", "Username cannot contain space or restricted special characters!");
   }

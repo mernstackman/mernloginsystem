@@ -13,12 +13,7 @@ app.use("*", cors());
 
 app.use("/", user_router);
 app.use("/", auth_router);
-/* app.use((req, res, next) => {
-  res.append("Access-Control-Allow-Origin", ["*"]);
-  res.append("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  res.append("Access-Control-Allow-Headers", "Content-Type");
-  next();
-}); */
+
 // Let the things inside frontend folder loadable from browser under public path
 app.use("/public", express.static(path.join(__dirname, "frontend")));
 

@@ -155,14 +155,15 @@ class SignUp extends Component {
     // isFormValid(this.state);
     console.log(data);
     signup(data).then(response => {
+      console.log(response);
       if (response.error) {
         console.log(response.error);
         return this.setState({
           error: "Something went wrong! Please re-check the info you supplied!"
         });
       }
-      this.setState({ error: "", open: true /* sendingEmail: true */ });
-      this.props.history.push("/email/verify", { email });
+      this.setState({ error: "", open: true });
+      this.props.history.push("/email", { email, id: response._id });
     });
   };
 

@@ -27,6 +27,12 @@ const signout = () => {
 // To be called on the front end
 // Get from front end and send it to backend
 const verify = data => {
+  /*   console.log(data);
+  if (!data) {
+    return new Promise((resolve, reject) => {
+      resolve({ error: "No valid data!" });
+    });
+  } */
   const emailToken = data.emailToken ? data.emailToken : "";
   return fetch("/email/" + emailToken, {
     method: "POST",
@@ -61,5 +67,22 @@ const getEmail = data => {
     });
 };
 
-const auths = { signin, signout, verify, getEmail };
+const updateMailToken = data => {
+  return fetch("/email/" + data.id, {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => {
+      return response.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+const auths = { signin, signout, verify, getEmail, updateMailToken };
 export default auths;

@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import express_jwt from "express-jwt";
 import config from "./../../config";
 import _ from "lodash";
+import Verify from "./../../frontend/bind/components/Verify";
 
 /* SIGN IN */
 const sign_in = (req, res) => {
@@ -17,34 +18,36 @@ const sign_in = (req, res) => {
     enteredID = "username";
   }
 
-  UserModel.findOne(user).exec((err, result) => {
-    if (!result) {
-      return res.json({
-        Error: "User not found!"
+  UserModel.findOne(user)
+    .select("-password_hash -salt")
+    .exec((err, output) => {
+      if (!result) {
+        return res.json({
+          Error: "User not found!"
+        });
+      }
+
+      if (!result.comparePassword(req.body.password)) {
+        return res.json({
+          Error: `Password and ${enteredID} don't match!`
+        });
+      }
+
+      // create token
+      const token = jwt.sign(
+        { _id: result._id },
+        config.secretKey,
+        { algorithm: "HS512" }
+        // ,(err, token) => {}
+      );
+
+      // Store token in HttpOnly cookie and expires in 24 hours - Log in the user
+      res.cookie("usin", token, {
+        httpOnly: true,
+        expires: new Date(Date.now() + 86400000)
       });
-    }
 
-    if (!result.comparePassword(req.body.password)) {
-      return res.json({
-        Error: `Password and ${enteredID} don't match!`
-      });
-    }
-
-    // create token
-    const token = jwt.sign(
-      { _id: result._id },
-      config.secretKey,
-      { algorithm: "HS512" }
-      // ,(err, token) => {}
-    );
-
-    // Store token in HttpOnly cookie and expires in 24 hours - Log in the user
-    res.cookie("usin", token, {
-      httpOnly: true,
-      expires: new Date(Date.now() + 86400000)
-    });
-
-    const output = {
+      /*     const output = {
       _id: result._id,
       username: result.username,
       fullname: result.fullname,
@@ -52,9 +55,9 @@ const sign_in = (req, res) => {
       created: result.created,
       updated: result.updated,
       updateCount: result.updateCount
-    };
-    res.json({ token, loggedIn_user: output });
-  });
+    }; */
+      res.json({ token, loggedIn_user: output });
+    });
 };
 
 /* SIGN OUT */
@@ -81,15 +84,34 @@ const currentUserOnly = (req, res, next) => {
 
 const emailtoken = (req, res, next, token) => {
   // console.log(token);
-  UserModel.findOne({ mailToken: token }).exec((err, user) => {
-    if (err) {
-      return res.status(400).json({
-        Error: "Email token is expired!"
-      });
-    }
-    req.userinfo = user;
-    next();
-  });
+  /*   if(!token) {
+    return new Promise((resolve, reject) => {
+      resolve({error: "No token provided!"})
+    })
+  } */
+  UserModel.findOne({ mailToken: token })
+    .select("-password_hash -salt")
+    .exec((error, user) => {
+      if (error) {
+        return res.status(400).json({
+          error
+        });
+      }
+      req.userinfo = user;
+      next();
+    });
+};
+
+const checkUserinfo = (req, res, next) => {
+  console.log("req.body");
+  if (!req.userinfo) {
+    return res.status(400).json({
+      error: "The verification token is not valid. Please register first!",
+      norecord: true
+    });
+  }
+
+  next();
 };
 
 const mailFromToken = (req, res, next) => {
@@ -102,30 +124,13 @@ const mailFromToken = (req, res, next) => {
   return res.json({ email: req.userinfo.email });
 };
 
-const testMailToken = (req, res) => {};
-
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
-  // console.log(req.userinfo);
-  // check if token present in the url
-  if (!req.userinfo) {
-    return res.status(400).json({
-      error: "The verification token is not valid. Please register first!",
-      norecord: true
-    });
-  }
-
-  if (Object.keys(req.body).length === 0 && req.body.constructor === Object) {
-    return res.status(400).json({
-      error: "Not enough data is supplied!"
-    });
-  }
-
   const user = req.userinfo;
 
   /*     if (user.confirmed) {
     return res.status(400).json({
-      error: "This user is verified."
+      error: "This user is already verified."
     });
   }
 
@@ -139,6 +144,10 @@ const verifyEmail = (req, res, next) => {
   } */
 
   // Check for token expiration (substract date) <---
+  console.log(user.tokenCreation);
+  if (!user.tokenCreation) {
+    return res.json({ error: "Creation date - token invalid!" });
+  }
   const currentDate = new Date();
   const tokenAge = Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60);
   console.log(tokenAge);
@@ -175,13 +184,54 @@ const verifyEmail = (req, res, next) => {
 
         return res.status(200).json({ activated, success: "Verification succeed!" });
       }
-    );
+    ).select("-password_hash -salt");
   }
 };
 
-const updateEmailToken = () => {};
+/* const useremail = (req, res, next, email) => {
+  UserModel.findOne({email}).select("-password_hash -salt")
+  .exec((error, user) => {
+    if (error) {
+      return res.status(400).json({
+        error
+      });
+    }
+    req.userdata = user;
+    next();
+  });
+} */
 
-const expireEmailToken = () => {};
+const updateEmailToken = (req, res) => {
+  // prevent duplicate request - the only way
+  req.connection.setTimeout(1000 * 60 * 10);
+  // return console.log(req.userinfo);
+
+  if (req.userinfo.confirmed) {
+    // return res.status(400).json({ verified: "You don't need to verify your email twice!" });
+  }
+
+  const { id, mailToken, mailSalt, tokenCreation } = req.body;
+
+  UserModel.findOneAndUpdate(
+    { _id: id },
+    { $set: { mailToken, mailSalt, tokenCreation } },
+    { upsert: true, new: true }
+  )
+    .select("-password_hash -salt -mailToken -mailSalt -tokenCreation")
+    .exec((error, user) => {
+      if (error) {
+        return res.status(400).json({
+          error: "There are problem when attempting to update your email token!"
+        });
+      }
+      return res.status(200).json({
+        user,
+        success:
+          "Token updated! Please check your email's inbox or spam folder" +
+          " for the new verification link!"
+      });
+    });
+};
 
 const sendEmailToken = () => {};
 
@@ -194,6 +244,6 @@ export default {
   verifyEmail,
   mailFromToken,
   updateEmailToken,
-  expireEmailToken,
-  sendEmailToken
+  sendEmailToken,
+  checkUserinfo
 };

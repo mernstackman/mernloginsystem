@@ -19,6 +19,7 @@ const create = (req, res, next) => {
       });
     }
     return res.status(200).json({
+      _id: result._id,
       message: "Saved to database!"
     });
   });
@@ -47,20 +48,24 @@ const clean_all = (req, res, next) => {
 
 // GET SELECTED USER'S DATA TO BE USED ON THE NEXT MIDDLEWARE
 const user_id = (req, res, next, id) => {
-  UserModel.findById(id).exec((err, user) => {
-    if (err) {
-      return res.status(400).json({
-        error: "Cannot retrieve user with that id!"
-      });
-    }
+  UserModel.findById(id)
+    .select("-password_hash -salt")
+    .exec((err, user) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Cannot retrieve user with that id!"
+        });
+      }
 
-    req.userinfo = user;
+      req.userinfo = user;
 
-    next();
-  });
+      next();
+    });
 };
 
 // MOVE AND DELETE
+// To prevent data replacement, unique values should be checked and the duplicate data is edited before moved
+// Example: by adding index number on username or email like: username_1 and 1_emailaddress@gmail.com
 const move_and_delete = (req, res, next) => {
   if (req.userinfo === null) {
     return res.status(400).json({
@@ -132,7 +137,7 @@ const update_one = (req, res) => {
     }
 
     return res.json(updated);
-  });
+  }).select("-password_hash -salt");
 };
 
 // GET ONE USER

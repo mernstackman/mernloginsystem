@@ -27,6 +27,7 @@ class MainRouter extends Component {
           <Route path="/register" component={Register} />
           <Route path="/members" component={Members} />
           <Route path="/profile/:user_id" component={Profile} />
+          {/* <Route path="/email/verify/:emailtoken" component={Verify} /> */}
           {<Route path="/email/:emailtoken" component={Verify} />}
           {<Route path="/email/" component={Verify} />}
 
