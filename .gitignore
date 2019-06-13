@@ -3,6 +3,7 @@ dist
 dist/
 ./dist
 package-lock.json
+.env
 
 # Logs
 logs

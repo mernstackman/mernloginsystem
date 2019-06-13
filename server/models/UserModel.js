@@ -3,14 +3,12 @@ import mongoose from "mongoose";
 // import crypto from "crypto";
 import hasher from "./../../functions/hasher";
 // import dateFormat from "dateformat";
+import { emailRegex, passRegex, userRegex } from "../../config";
 
-mongoose.set("useCreateIndex", true);
+// Moved to server.js
+// mongoose.set("useCreateIndex", true);
 
 const Schema = mongoose.Schema;
-
-const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
-const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
 
 const UserSchema = new Schema({
   fullname: {

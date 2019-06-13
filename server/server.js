@@ -1,25 +1,21 @@
+import dotenv from "dotenv";
+dotenv.config();
+
 import app from "./express";
 import mongoose from "mongoose";
+import config from "../config";
 
-const PORT = process.env.PORT || 3000;
-const mongoClientURI =
-  process.env.MONGODB_URI ||
-  process.env.MONGO_HOST ||
-  "mongodb://" +
-    (process.env.IP || "localhost") +
-    ":" +
-    (process.env.MONGO_PORT || "27017") +
-    "/mernloginsystem";
-
+import mailUser from "./serverConfig";
 /* CONNECT TO MONGODB */
 const db = mongoose.connect;
-db(mongoClientURI, { useNewUrlParser: true });
+db(config.mongoClientURI, { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false });
+
 mongoose.connection
   .on("error", () => {
-    throw new Error(`Unable to connect to ${mongoClientURI}`);
+    throw new Error(`Unable to connect to ${config.mongoClientURI}`);
   })
   .once("open", () => {
-    console.log("Connected to %s", mongoClientURI);
+    console.log("Connected to %s", config.mongoClientURI);
   });
 /* <-- end --> */
 
@@ -28,6 +24,9 @@ app.listen(3000, err => {
   if (err) {
     console.log(err);
   }
-  console.log(`Server running on port ${PORT}`);
+  const mail = process.env.MAIL_USER;
+  console.log(`Server running on port ${config.PORT}`);
+  console.log(process.env.MAIL_USER);
+  console.log(mailUser);
 });
 /* <--end--> */

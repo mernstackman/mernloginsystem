@@ -4,13 +4,13 @@
  */
 
 import { UserModel, UserModel_deleted } from "./../models/UserModel";
+import { emailRegex } from "../../config";
 import _ from "lodash";
 
 // CREATE USER
 const create = (req, res, next) => {
   // console.log(req.body);
   const user = new UserModel(req.body);
-
   // Required validation
   user.save((err, result) => {
     if (err) {
@@ -119,7 +119,6 @@ const delete_one = (req, res, message) => {
 // UPDATE ONE USER
 const update_one = (req, res) => {
   console.log("update_one");
-  const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
   if (!emailRegex.test(req.body.email) || req.body.email === req.userinfo.email) {
     return res.status(400).json({
       error: "Email pattern should be valid and can't be the same as the already registered one!"

@@ -1,16 +1,14 @@
-import { UserModel, UserModel_deleted } from "./../models/UserModel";
+import { UserModel } from "./../models/UserModel";
 import jwt from "jsonwebtoken";
 import express_jwt from "express-jwt";
-import config from "./../../config";
 import _ from "lodash";
-import Verify from "./../../frontend/bind/components/Verify";
+import { emailRegex, secretKey } from "../../config";
 
 /* SIGN IN */
 const sign_in = (req, res) => {
-  const regex = /.+\@.+\..+/;
   let user = {};
   let enteredID = "";
-  if (regex.test(req.body.user)) {
+  if (emailRegex.test(req.body.user)) {
     user = { email: req.body.user };
     enteredID = "email";
   } else {
@@ -19,43 +17,28 @@ const sign_in = (req, res) => {
   }
 
   UserModel.findOne(user)
-    .select("-password_hash -salt")
+    // .select("-password_hash -salt")
     .exec((err, output) => {
-      if (!result) {
+      if (!output) {
         return res.json({
           Error: "User not found!"
         });
       }
 
-      if (!result.comparePassword(req.body.password)) {
+      if (!output.comparePassword(req.body.password)) {
         return res.json({
           Error: `Password and ${enteredID} don't match!`
         });
       }
 
       // create token
-      const token = jwt.sign(
-        { _id: result._id },
-        config.secretKey,
-        { algorithm: "HS512" }
-        // ,(err, token) => {}
-      );
+      const token = jwt.sign({ _id: output._id }, secretKey, { algorithm: "HS512" });
 
       // Store token in HttpOnly cookie and expires in 24 hours - Log in the user
       res.cookie("usin", token, {
         httpOnly: true,
         expires: new Date(Date.now() + 86400000)
       });
-
-      /*     const output = {
-      _id: result._id,
-      username: result.username,
-      fullname: result.fullname,
-      email: result.email,
-      created: result.created,
-      updated: result.updated,
-      updateCount: result.updateCount
-    }; */
       res.json({ token, loggedIn_user: output });
     });
 };
@@ -68,7 +51,7 @@ const sign_out = (req, res) => {
 
 // Require user to sign in to be able to see a page
 const signedInOnly = express_jwt({
-  secret: config.secretKey,
+  secret: secretKey,
   requestProperty: "auth"
 });
 
@@ -82,14 +65,16 @@ const currentUserOnly = (req, res, next) => {
   next();
 };
 
-const emailtoken = (req, res, next, token) => {
-  // console.log(token);
-  /*   if(!token) {
-    return new Promise((resolve, reject) => {
-      resolve({error: "No token provided!"})
-    })
-  } */
-  UserModel.findOne({ mailToken: token })
+const findByParam = (req, res, next, param) => {
+  console.log(param);
+  let parameter = {};
+  if (emailRegex.test(param)) {
+    parameter = { email: param };
+  } else {
+    parameter = { mailToken: param };
+  }
+
+  UserModel.findOne(parameter)
     .select("-password_hash -salt")
     .exec((error, user) => {
       if (error) {
@@ -106,8 +91,7 @@ const checkUserinfo = (req, res, next) => {
   console.log("req.body");
   if (!req.userinfo) {
     return res.status(400).json({
-      error: "The verification token is not valid. Please register first!",
-      norecord: true
+      error: "The verification token is not valid. Please register first!"
     });
   }
 
@@ -126,9 +110,9 @@ const mailFromToken = (req, res, next) => {
 
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
+  console.log(process.env.MAIL_USER);
   const user = req.userinfo;
-
-  /*     if (user.confirmed) {
+  if (user.confirmed) {
     return res.status(400).json({
       error: "This user is already verified."
     });
@@ -136,35 +120,12 @@ const verifyEmail = (req, res, next) => {
 
   // Check for token expiration (substract date) <---
   const currentDate = new Date();
-  const tokenAge = (Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60)) % 24;
+  const tokenAge = Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60);
   if (tokenAge >= 24) {
     return res.status(400).json({
       error: "Token expired!"
     });
-  } */
-
-  // Check for token expiration (substract date) <---
-  console.log(user.tokenCreation);
-  if (!user.tokenCreation) {
-    return res.json({ error: "Creation date - token invalid!" });
   }
-  const currentDate = new Date();
-  const tokenAge = Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60);
-  console.log(tokenAge);
-  if (tokenAge >= 20) {
-    return res.status(400).json({
-      error: "Token expired!"
-    });
-  }
-  /* 
-  console.log(user.tokenCreation.getTime());
-  console.log(
-    Math.abs(currentDate.getTime() - new Date(user.tokenCreation.toString()).getTime()),
-    1
-  );
-  console.log(Math.abs(currentDate.getTime() - user.tokenCreation.getTime()), 2);
-  console.log(Math.abs(currentDate - user.tokenCreation), 3);
-  console.log(tokenAge >= 0.5); */
 
   // compare token
   // activate user if valid
@@ -188,32 +149,19 @@ const verifyEmail = (req, res, next) => {
   }
 };
 
-/* const useremail = (req, res, next, email) => {
-  UserModel.findOne({email}).select("-password_hash -salt")
-  .exec((error, user) => {
-    if (error) {
-      return res.status(400).json({
-        error
-      });
-    }
-    req.userdata = user;
-    next();
-  });
-} */
-
 const updateEmailToken = (req, res) => {
   // prevent duplicate request - the only way
   req.connection.setTimeout(1000 * 60 * 10);
   // return console.log(req.userinfo);
 
+  console.log(req.body);
   if (req.userinfo.confirmed) {
-    // return res.status(400).json({ verified: "You don't need to verify your email twice!" });
+    return res.status(400).json({ verified: "You don't need to verify your email twice!" });
   }
-
-  const { id, mailToken, mailSalt, tokenCreation } = req.body;
+  const { email, mailToken, mailSalt, tokenCreation } = req.body;
 
   UserModel.findOneAndUpdate(
-    { _id: id },
+    { email },
     { $set: { mailToken, mailSalt, tokenCreation } },
     { upsert: true, new: true }
   )
@@ -240,7 +188,7 @@ export default {
   sign_out,
   signedInOnly,
   currentUserOnly,
-  emailtoken,
+  findByParam,
   verifyEmail,
   mailFromToken,
   updateEmailToken,

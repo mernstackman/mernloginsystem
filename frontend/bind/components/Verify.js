@@ -13,22 +13,32 @@ class Verify extends Component {
       error: false,
       loading: false,
       email: "",
-      id: "",
       hideRequest: false,
       wait: false
     };
     this.match = match;
   }
+
   componentWillReceiveProps = props => {
-    if (props.match.params.emailtoken) {
+    if (props.match.params.findbyparam) {
       // if this present/ !undefined
-      this.setState({ emailToken: props.match.params.emailtoken, useParam: true, loading: true });
+      this.setState({
+        emailToken: props.match.params.findbyparam,
+        useParam: true,
+        loading: true,
+        hideRequest: true
+      });
     }
   };
   componentDidMount = () => {
-    if (this.match.params.emailtoken) {
+    if (this.match.params.findbyparam) {
       // if this present/ !undefined
-      this.setState({ emailToken: this.match.params.emailtoken, useParam: true, loading: true });
+      this.setState({
+        emailToken: this.match.params.findbyparam,
+        useParam: true,
+        loading: true,
+        hideRequest: true
+      });
     }
   };
 
@@ -45,7 +55,6 @@ class Verify extends Component {
       return this.setState({ message: "Email address required!", error: true, loading: false });
     }
     const { email } = this.state.email ? this.state : this.props.location.state;
-    const { id } = this.state.id ? this.state : this.props.location.state;
     // Create new email token using different salt
     const mailSalt = hasher.createSalt();
     const mailToken = hasher.createHash(email, mailSalt);
@@ -54,7 +63,7 @@ class Verify extends Component {
     this.setState({ hideRequest: true });
 
     // Update the database record
-    auths.updateMailToken({ id, email, mailToken, mailSalt, tokenCreation }).then(response => {
+    auths.updateMailToken({ email, mailToken, mailSalt, tokenCreation }).then(response => {
       console.log(response);
       if (response.verified) {
         return this.setState({ message: response.verified });
@@ -69,47 +78,58 @@ class Verify extends Component {
         // Tell user to wait for 10 minutes before the next request
         setTimeout(() => {
           this.setState({ hideRequest: false, wait: false });
-        }, 1000 * 60 * /* 10 */ 0.1);
+        }, 1000 * 60 * 0.25);
         return this.setState({ message: response.success, wait: true });
       }
     });
 
     // Hide link - Wait 10 minutes before another request can be made
-    console.log("Hide link for 10 minutes");
+    console.log("Hide link for 25 seconds");
   };
 
   verifyEmail = () => {
     const data = this.state.emailToken ? { emailToken: this.state.emailToken } : "";
-
     console.log(this.props.location.state);
     if (!this.props.location.state && this.state.emailToken != "") {
       auths.getEmail({ emailToken: this.state.emailToken }).then(response => {
         if (response.email) {
-          this.setState({ email: response.email, id: response._id });
+          this.setState({ email: response.email });
         }
       });
     }
 
-    this.setState({ error: true, loading: false, hideRequest: false });
     if (!data) {
-      return this.setState({ message: "No valid data is supplied!" });
+      return this.setState({
+        message: "No valid data is supplied!",
+        error: true,
+        loading: false,
+        hideRequest: false
+      });
     }
 
     auths.verify(data).then(response => {
       console.log(response);
-      /* if(response) {
-} */
-
-      if (response.error && !response.norecord) {
-        return this.setState({ message: response.error });
+      let hideRequest = true;
+      if (!response.error.includes("already verified.")) {
+        hideRequest = false;
       }
-      if (response.norecord) {
-        return this.setState({ message: response.error });
+
+      if (response.error) {
+        return this.setState({
+          message: response.error,
+          error: true,
+          hideRequest,
+          loading: false
+        });
       }
       if (response.success) {
-        return this.setState({ message: response.success, error: false, hideRequest: true });
+        return this.setState({
+          message: response.success,
+          error: false,
+          hideRequest,
+          loading: false
+        });
       }
-
       console.log(this.state.message);
     });
   };
@@ -123,7 +143,7 @@ class Verify extends Component {
   render() {
     if (this.state.emailToken) console.log(this.state.emailToken, "X");
 
-    const { emailToken, useParam, message, loading, error, norecord, hideRequest } = {
+    const { emailToken, useParam, message, loading, error, hideRequest } = {
       ...this.state
     };
 
@@ -133,7 +153,7 @@ class Verify extends Component {
     if (this.props.location.state) {
       email = this.props.location.state.email;
     }
-    console.log(this.props.location.state);
+    // console.log(this.state);
     return (
       <div>
         {loading && "progress indicator"}
@@ -151,8 +171,8 @@ class Verify extends Component {
 
         {this.state.wait && (
           <div>
-            {/* Make this a countdown timer someday.. */}Please wait for 10 minutes before making
-            the next request!
+            {/* Make this a countdown timer someday.. */}
+            Please wait for 25 seconds before making the next request!
           </div>
         )}
 

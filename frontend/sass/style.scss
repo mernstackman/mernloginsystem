@@ -1,3 +1,5 @@
+$borderSmall: 1px solid;
+
 h1,
 h2,
 h3,
@@ -57,4 +59,10 @@ p {
   height: 100%;
   background: #3e3e3e;
   opacity: 0.9;
+}
+.red {
+  border: $borderSmall red;
+}
+.green {
+  border: $borderSmall green;
 }

@@ -4,12 +4,13 @@ import path from "path";
 import cors from "cors";
 import user_router from "./routes/UserRoutes";
 import auth_router from "./routes/AuthRoutes";
+import config from "../config";
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use("*", cors());
+app.use(cors({ origin: config.CLIENT_ORIGIN }));
 
 app.use("/", user_router);
 app.use("/", auth_router);

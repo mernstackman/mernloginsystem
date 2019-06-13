@@ -2,34 +2,11 @@ import React, { Component } from "react";
 import { signup, checkAvailability } from "./../../apis/user-api";
 import loading from "./../../img/loading.gif";
 import hasher from "./../../../functions/hasher";
-
+import { isFormValid } from "./../../../functions/frontend";
+import { emailRegex, passRegex, userRegex } from "../../../config";
 /* 
-This script is not yet completed. There several features that need to be added.
+This script is not yet completed. There are several features that needs to be added and bugs that needs to be fixed.
 */
-const isFormValid = state => {
-  const { specError, username, email, password, password_confirm } = { ...state };
-  let valid = true;
-  Object.values(specError).forEach(val => {
-    Object.values(val).forEach(v => {
-      v.length > 0 && (valid = false);
-    });
-    // console.log(val);
-  });
-
-  const fields = { username, email, password, password_confirm };
-  Object.values(fields).forEach(val => {
-    val == "" && (valid = false);
-  });
-  console.log(valid);
-  return valid;
-};
-
-const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-const mailRegex = /.+\@.+\..+/;
-const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
-const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
-
-// -------------------------------------------------------------------------------
 
 class SignUp extends Component {
   state = {
@@ -41,8 +18,10 @@ class SignUp extends Component {
     open: false,
     error: "",
     canSubmit: false,
-    loading: false,
-    changing: "",
+    loadingUsername: false,
+    loadingEmail: false,
+    focusEmail: false,
+    focusUsername: false,
     // sendingEmail: false,
     specError: {
       fullname: { long: "" },
@@ -52,6 +31,10 @@ class SignUp extends Component {
       password_confirm: { contains: "", matched: "" }
     }
   };
+
+  /*   componentDidUpdate(prevProps, prevState) {
+    console.log(this.state.username, prevState.username);
+  } */
 
   handleChange = e => {
     const specErrorCopy = { ...this.state.specError };
@@ -69,8 +52,7 @@ class SignUp extends Component {
         break;
       case "username":
         //-> show loader
-        changing = "username";
-        this.setState({ changing });
+        this.setState({ focusUsername: true });
         specErrorCopy.username.long =
           value.length > 20 || value.length < 3
             ? "Username should be between 3 to 20 characters long."
@@ -80,28 +62,26 @@ class SignUp extends Component {
           : "";
         // compare value with the available record using ...?
         if (value != "") {
-          this.setState({ loading: true });
-
+          this.setState({ loadingUsername: true });
           data = { username: value };
           checkAvailability(data).then(response => {
             specErrorCopy.username.existed = response.message;
-            this.setState({ specError: specErrorCopy, loading: false });
-            console.log(response.message);
+            this.setState({ specError: specErrorCopy, loadingUsername: false });
+            // console.log(response.message);
             //-> hide loader
           });
         }
         break;
       case "email":
-        changing = "email";
-        this.setState({ changing });
+        this.setState({ focusEmail: true });
         specErrorCopy.email.matched = emailRegex.test(value) ? "" : "Please enter valid email!";
 
         if (value != "") {
-          this.setState({ loading: true });
+          this.setState({ loadingEmail: true });
           data = { email: value };
           checkAvailability(data).then(response => {
             specErrorCopy.email.existed = response.message;
-            this.setState({ specError: specErrorCopy, loading: false });
+            this.setState({ specError: specErrorCopy, loadingEmail: false });
           });
         }
         break;
@@ -130,8 +110,25 @@ class SignUp extends Component {
         break;
     }
     const canSubmit = isFormValid(this.state);
-    console.log(canSubmit);
+    // console.log(canSubmit);
     this.setState({ specError: specErrorCopy, [name]: value, canSubmit });
+  };
+
+  handleBlur = e => {
+    if (e.target.name == "username") {
+      this.setState({ focusUsername: !this.state.focusUsername });
+    }
+    if (e.target.name == "email") {
+      this.setState({ focusEmail: !this.state.focusEmail });
+    }
+  };
+  handleFocus = e => {
+    if (e.target.name == "username") {
+      this.setState({ focusUsername: !this.state.focusUsername });
+    }
+    if (e.target.name == "email") {
+      this.setState({ focusEmail: !this.state.focusEmail });
+    }
   };
 
   handleSubmit = e => {
@@ -153,11 +150,11 @@ class SignUp extends Component {
       tokenCreation
     };
     // isFormValid(this.state);
-    console.log(data);
+    // console.log(data);
     signup(data).then(response => {
       console.log(response);
       if (response.error) {
-        console.log(response.error);
+        // console.log(response.error);
         return this.setState({
           error: "Something went wrong! Please re-check the info you supplied!"
         });
@@ -167,15 +164,51 @@ class SignUp extends Component {
     });
   };
 
+  // Validate username
+  usernameValid = input => {
+    const { username } = this.state.specError;
+    input = typeof input === "undefined" ? false : true;
+    if (this.state.loadingUsername) {
+      return;
+    }
+    if (
+      username.long.length <= 0 &&
+      username.existed.length <= 0 &&
+      username.spechar.length <= 0 &&
+      this.state.username.length > 0
+    ) {
+      return input ? true : "check";
+    }
+    if (username.long.length > 0 || username.existed.length > 0 || username.spechar.length > 0) {
+      return input ? false : "x";
+    }
+  };
+
+  // Validate email
+  emailValid = input => {
+    input = typeof input === "undefined" ? false : true;
+    const { email } = this.state.specError;
+    if (this.state.loadingEmail) {
+      return;
+    }
+    if (email.matched.length <= 0 && email.existed.length <= 0 && this.state.email.length > 0) {
+      return input ? true : "check";
+    }
+    if (email.matched.length > 0 || email.existed.length > 0) {
+      return input ? false : "x";
+    }
+  };
+
   render() {
     const { fullname, username, email, password, password_confirm } = this.state.specError;
-    console.log(username.existed.length);
+
+    // console.log(username.existed.length);
     return (
       <div>
         {this.state.error && <p>{this.state.error.toString()}</p>}
-        {!this.state.error && (
+        {/* !this.state.error && (
           <p>Please check your email's inbox or spam folder for the confirmation instruction!</p>
-        )}
+        ) */}
 
         <form onSubmit={this.handleSubmit} noValidate>
           <div>
@@ -198,20 +231,14 @@ class SignUp extends Component {
               id="username"
               placeholder="Username"
               onChange={this.handleChange}
+              onFocus={this.handleFocus}
+              onBlur={this.handleBlur}
+              className={
+                this.usernameValid(true) ? "green" : this.usernameValid(true) == false ? "red" : ""
+              }
             />{" "}
-            {this.state.loading && this.state.changing == "username" && <img src={loading} />}
-            {!this.state.loading &&
-              this.state.changing == "username" &&
-              username.long.length <= 0 &&
-              username.existed.length <= 0 &&
-              username.spechar.length <= 0 &&
-              "check" /* <img src={"checkmark"} /> */}
-            {((!this.state.loading &&
-              this.state.changing == "username" &&
-              username.long.length > 0) ||
-              username.existed.length > 0 ||
-              username.spechar.length > 0) &&
-              "x" /* <img src={"x"} /> */}
+            {this.state.loadingUsername && this.state.focusUsername && <img src={loading} />}
+            {this.usernameValid()}
             {username.long.length > 0 && (
               <span>
                 <br />
@@ -239,18 +266,15 @@ class SignUp extends Component {
               id="email"
               placeholder="Email"
               onChange={this.handleChange}
+              onFocus={this.handleFocus}
+              onBlur={this.handleBlur}
+              className={
+                this.emailValid(true) ? "green" : this.emailValid(true) == false ? "red" : ""
+              }
               noValidate
             />{" "}
-            {!this.state.loading &&
-              this.state.changing == "email" &&
-              email.matched.length <= 0 &&
-              email.existed.length <= 0 &&
-              "check" /* <img src={"checkmark"} /> */}
-            {!this.state.loading &&
-              this.state.changing == "email" &&
-              (email.matched.length > 0 || email.existed.length > 0) &&
-              "x" /* <img src={"x"} /> */}
-            {this.state.loading && this.state.changing == "email" && <img src={loading} />}
+            {this.state.loadingEmail && this.state.focusEmail && <img src={loading} />}
+            {this.emailValid()}
             {email.matched.length > 0 && (
               <span>
                 <br /> {email.matched}

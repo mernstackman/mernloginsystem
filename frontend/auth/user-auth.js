@@ -68,7 +68,7 @@ const getEmail = data => {
 };
 
 const updateMailToken = data => {
-  return fetch("/email/" + data.id, {
+  return fetch("/email/" + data.email, {
     method: "PUT",
     headers: {
       Accept: "application/json",
