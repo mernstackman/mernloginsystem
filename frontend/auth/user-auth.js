@@ -84,5 +84,23 @@ const updateMailToken = data => {
     });
 };
 
-const auths = { signin, signout, verify, getEmail, updateMailToken };
+const sendTheEmail = data => {
+  console.log(data);
+  return fetch("/send/email", {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => {
+      return response.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+const auths = { signin, signout, verify, getEmail, updateMailToken, sendTheEmail };
 export default auths;

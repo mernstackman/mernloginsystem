@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 import express_jwt from "express-jwt";
 import _ from "lodash";
 import { emailRegex, secretKey } from "../../config";
+import { confirmMsg } from "./../../email/emailMessages";
+import sendEmail from "./../../functions/sendEmail";
 
 /* SIGN IN */
 const sign_in = (req, res) => {
@@ -66,7 +68,10 @@ const currentUserOnly = (req, res, next) => {
 };
 
 const findByParam = (req, res, next, param) => {
-  console.log(param);
+  // console.log(param);
+  /*   if (param == "send") {
+    return;
+  } */
   let parameter = {};
   if (emailRegex.test(param)) {
     parameter = { email: param };
@@ -88,12 +93,7 @@ const findByParam = (req, res, next, param) => {
 };
 
 const checkUserinfo = (req, res, next) => {
-  console.log("req.body");
-  if (!req.userinfo) {
-    return res.status(400).json({
-      error: "The verification token is not valid. Please register first!"
-    });
-  }
+  // console.log("req.body");
 
   next();
 };
@@ -110,9 +110,20 @@ const mailFromToken = (req, res, next) => {
 
 // Request data from model and then pass it through url/ route
 const verifyEmail = (req, res, next) => {
-  console.log(process.env.MAIL_USER);
+  // prevent duplicate request - the only way
+  req.connection.setTimeout(1000 * 60 * 10);
+  // console.log(process.env.MAIL_USER);
   const user = req.userinfo;
-  if (user.confirmed) {
+  let a = 0;
+  console.log(user.confirmed, a++);
+
+  if (!req.userinfo) {
+    return res.status(400).json({
+      error: "The verification token is not valid. Please register first!"
+    });
+  }
+
+  if (user.confirmed == true) {
     return res.status(400).json({
       error: "This user is already verified."
     });
@@ -154,7 +165,6 @@ const updateEmailToken = (req, res) => {
   req.connection.setTimeout(1000 * 60 * 10);
   // return console.log(req.userinfo);
 
-  console.log(req.body);
   if (req.userinfo.confirmed) {
     return res.status(400).json({ verified: "You don't need to verify your email twice!" });
   }
@@ -181,7 +191,20 @@ const updateEmailToken = (req, res) => {
     });
 };
 
-const sendEmailToken = () => {};
+const sendTheEmail = (req, res) => {
+  // prevent duplicate request - the only way
+  req.connection.setTimeout(1000 * 60 * 10);
+
+  const emaildata = {
+    from: `"MERN Stack Email" ${process.env.MAIL_USER}`,
+    to: /* req.body.email */ "mernstackweb@gmail.com",
+    ...confirmMsg(req.body.mailToken)
+  };
+  console.log(emaildata);
+  sendEmail(emaildata).then(response => {
+    return res.json({ response });
+  });
+};
 
 export default {
   sign_in,
@@ -192,6 +215,6 @@ export default {
   verifyEmail,
   mailFromToken,
   updateEmailToken,
-  sendEmailToken,
+  sendTheEmail,
   checkUserinfo
 };

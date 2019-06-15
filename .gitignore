@@ -4,6 +4,7 @@ dist/
 ./dist
 package-lock.json
 .env
+env.js
 
 # Logs
 logs

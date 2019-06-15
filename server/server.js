@@ -5,11 +5,9 @@ import app from "./express";
 import mongoose from "mongoose";
 import config from "../config";
 
-import mailUser from "./serverConfig";
 /* CONNECT TO MONGODB */
 const db = mongoose.connect;
 db(config.mongoClientURI, { useNewUrlParser: true, useCreateIndex: true, useFindAndModify: false });
-
 mongoose.connection
   .on("error", () => {
     throw new Error(`Unable to connect to ${config.mongoClientURI}`);
@@ -26,7 +24,7 @@ app.listen(3000, err => {
   }
   const mail = process.env.MAIL_USER;
   console.log(`Server running on port ${config.PORT}`);
-  console.log(process.env.MAIL_USER);
-  console.log(mailUser);
+  /*   console.log(process.env.MAIL_USER);
+  console.log(config.mailUser); */
 });
 /* <--end--> */

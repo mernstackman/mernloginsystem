@@ -9,8 +9,9 @@ router.route("/email/verify/:findbyparam").get(authCtrl.mailFromToken);
 //   .post(authCtrl.verifyEmail);
 router
   .route("/email/:findbyparam")
-  .post(authCtrl.checkUserinfo, authCtrl.verifyEmail)
+  .post(authCtrl.verifyEmail)
   .put(authCtrl.updateEmailToken);
+router.route("/send/email").post(authCtrl.sendTheEmail);
 
 router.param("findbyparam", authCtrl.findByParam);
 

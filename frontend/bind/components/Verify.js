@@ -59,27 +59,59 @@ class Verify extends Component {
     const mailSalt = hasher.createSalt();
     const mailToken = hasher.createHash(email, mailSalt);
     const tokenCreation = new Date();
+    const data = { email, mailToken };
 
-    this.setState({ hideRequest: true });
+    this.setState({ hideRequest: true, loading: true });
 
     // Update the database record
     auths.updateMailToken({ email, mailToken, mailSalt, tokenCreation }).then(response => {
       console.log(response);
       if (response.verified) {
-        return this.setState({ message: response.verified });
+        return this.setState({ message: response.verified, loading: false });
       }
       if (response.error) {
-        return this.setState({ message: response.error, hideRequest: false });
+        return this.setState({ message: response.error, hideRequest: false, loading: false });
       }
       // if Success
       if (response.success) {
+        console.log("Before send email");
+
         // Send to the user's email
+        auths.sendTheEmail(data).then(res => {
+          if (!res) {
+            return this.setState({
+              message: "Something went wrong.. Please contact us!",
+              loading: false
+            });
+          }
+
+          const { accepted, rejected } = res.response;
+          console.log(accepted[1], accepted.length, rejected);
+          if (accepted.length == 1) {
+            return this.setState({
+              message:
+                "Email sent! Please check your email's inbox or spam folder for the new verification link!",
+              loading: false
+            });
+          }
+          if (rejected.length == 1) {
+            return this.setState({
+              message: "Something went wrong.. Please contact us!",
+              loading: false
+            });
+          }
+        });
+        console.log("after send email");
 
         // Tell user to wait for 10 minutes before the next request
         setTimeout(() => {
           this.setState({ hideRequest: false, wait: false });
         }, 1000 * 60 * 0.25);
-        return this.setState({ message: response.success, wait: true });
+        return this.setState({
+          message: "Please wait while we are sending new verification email!",
+          wait: true,
+          loading: true
+        });
       }
     });
 
@@ -156,7 +188,7 @@ class Verify extends Component {
     // console.log(this.state);
     return (
       <div>
-        {loading && "progress indicator"}
+        {loading && "progress indicator "}
         {message != "" && message}
         {!useParam && (
           <form onSubmit={this.handleSubmit} noValidate>
