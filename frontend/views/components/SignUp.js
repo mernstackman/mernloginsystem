@@ -1,9 +1,10 @@
 import React, { Component } from "react";
 import { signup, checkAvailability } from "./../../apis/user-api";
-import loading from "./../../img/loading.gif";
+import loadingGIF from "./../../img/loading.gif";
 import hasher from "./../../../functions/hasher";
 import { isFormValid } from "./../../../functions/frontend";
 import { emailRegex, passRegex, userRegex } from "../../../config";
+import auths from "./../../auth/user-auth";
 /* 
 This script is not yet completed. There are several features that needs to be added and bugs that needs to be fixed.
 */
@@ -15,8 +16,10 @@ class SignUp extends Component {
     email: "",
     password: "",
     password_confirm: "",
-    open: false,
     error: "",
+    message: "",
+    emailSent: "",
+    loading: false,
     canSubmit: false,
     loadingUsername: false,
     loadingEmail: false,
@@ -133,6 +136,7 @@ class SignUp extends Component {
 
   handleSubmit = e => {
     e.preventDefault();
+    this.setState({ canSubmit: false });
     // Check if there are error before submitting. Something like check if there are error message under input field.
     const { fullname, username, email, password, password_confirm } = { ...this.state };
 
@@ -152,6 +156,8 @@ class SignUp extends Component {
     // isFormValid(this.state);
     // console.log(data);
     signup(data).then(response => {
+      // DISPLAY MESSAGE : --loadingGIF animation-- Please Wait: saving your data to database
+      this.setState({ message: "saving your data to database", loading: true });
       console.log(response);
       if (response.error) {
         // console.log(response.error);
@@ -159,8 +165,41 @@ class SignUp extends Component {
           error: "Something went wrong! Please re-check the info you supplied!"
         });
       }
-      this.setState({ error: "", open: true });
-      this.props.history.push("/email", { email, id: response._id });
+      this.setState({ error: "" });
+
+      auths.sendTheEmail(data).then(res => {
+        // DISPLAY MESSAGE : --loadingGIF animation-- Please Wait: sending confirmation email
+        this.setState({ message: "sending confirmation email", loading: true });
+        if (!res) {
+          // DISPLAY ERROR MESSAGE and hide loadingGIF message
+          return this.setState({
+            error: "Something went wrong.. Please contact us!",
+            loading: false
+          });
+        }
+
+        const { accepted, rejected } = res.response;
+        if (accepted.length == 1) {
+          // DISPLAY MESSAGE :
+          // Email sent! Please check your inbox or spam folder for verification message.
+          // --loadingGIF animation-- Please Wait: redirecting you to the email verification page
+          this.setState({
+            message: "redirecting you to the email verification page",
+            loading: true,
+            emailSent:
+              "Email sent! Please check your inbox or spam folder for verification message."
+          });
+          return setTimeout(
+            () => this.props.history.push("/email", { email, id: response._id }),
+            5000
+          );
+        }
+
+        if (rejected.length == 1) {
+          // DISPLAY ERROR MESSAGE and hide loadingGIF message
+          return this.setState({ error: "Something went wrong.. Please contact us!" });
+        }
+      });
     });
   };
 
@@ -201,14 +240,27 @@ class SignUp extends Component {
 
   render() {
     const { fullname, username, email, password, password_confirm } = this.state.specError;
-
+    const {
+      loading,
+      message,
+      emailSent,
+      error,
+      loadingUsername,
+      loadingEmail,
+      focusEmail,
+      focusUsername,
+      canSubmit
+    } = this.state;
     // console.log(username.existed.length);
     return (
       <div>
-        {this.state.error && <p>{this.state.error.toString()}</p>}
-        {/* !this.state.error && (
-          <p>Please check your email's inbox or spam folder for the confirmation instruction!</p>
-        ) */}
+        {error && <p>{error.toString()}</p>}
+        {emailSent && <div>{emailSent}</div>}
+        {loading && message != "" && (
+          <div>
+            <img src={loadingGIF} /> Please Wait: {message}
+          </div>
+        )}
 
         <form onSubmit={this.handleSubmit} noValidate>
           <div>
@@ -237,7 +289,7 @@ class SignUp extends Component {
                 this.usernameValid(true) ? "green" : this.usernameValid(true) == false ? "red" : ""
               }
             />{" "}
-            {this.state.loadingUsername && this.state.focusUsername && <img src={loading} />}
+            {loadingUsername && focusUsername && <img src={loadingGIF} />}
             {this.usernameValid()}
             {username.long.length > 0 && (
               <span>
@@ -273,7 +325,7 @@ class SignUp extends Component {
               }
               noValidate
             />{" "}
-            {this.state.loadingEmail && this.state.focusEmail && <img src={loading} />}
+            {loadingEmail && focusEmail && <img src={loadingGIF} />}
             {this.emailValid()}
             {email.matched.length > 0 && (
               <span>
@@ -332,7 +384,7 @@ class SignUp extends Component {
             )}
           </div>
           <br />
-          <input type="submit" value="Submit" disabled={!this.state.canSubmit} />
+          <input type="submit" value="Submit" disabled={!canSubmit} />
         </form>
       </div>
     );

@@ -118,14 +118,14 @@ const verifyEmail = (req, res, next) => {
 
   if (!req.userinfo) {
     return res.status(400).json({
-      error: "The verification token is not valid. Please register first!"
+      error: "The verification token is not valid. Please register first or recheck your email!"
     });
   }
 
   console.log(user.confirmed, a++);
   if (user.confirmed == true) {
     return res.status(400).json({
-      error: "This user is already verified."
+      error: "This user is already verified. Please log in to your account."
     });
   }
 
@@ -154,7 +154,9 @@ const verifyEmail = (req, res, next) => {
           });
         }
 
-        return res.status(200).json({ activated, success: "Verification succeed!" });
+        return res
+          .status(200)
+          .json({ activated, success: "Verification succeed! Please log in to your account." });
       }
     ).select("-password_hash -salt");
   }

@@ -202,14 +202,17 @@ class Verify extends Component {
         {loading && "progress indicator "}
         {message != "" && message}
         {!useParam && (
-          <form onSubmit={this.handleSubmit} noValidate>
-            <label htmlFor="emailToken">Email Token</label>
-            <br />
-            <input type="text" name="emailToken" id="emailToken" onChange={this.handleChange} />
-            <br />
-            <br />
-            <input type="submit" value="Submit" />
-          </form>
+          <div>
+            Please check your email for your verification token and enter it in the following field!
+            <form onSubmit={this.handleSubmit} noValidate>
+              <label htmlFor="emailToken">Email Token</label>
+              <br />
+              <input type="text" name="emailToken" id="emailToken" onChange={this.handleChange} />
+              <br />
+              <br />
+              <input type="submit" value="Submit" />
+            </form>
+          </div>
         )}
 
         {this.state.wait && (
