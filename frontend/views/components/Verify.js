@@ -6,6 +6,7 @@ import hasher from "./../../../functions/hasher";
 class Verify extends Component {
   constructor(props) {
     super(props);
+
     let emailToken = "",
       useParam = false,
       loading = false,
@@ -57,10 +58,6 @@ class Verify extends Component {
     auths.verify(data).then(response => {
       console.log(response);
       console.log(this.state.message);
-      /*if (this.state.message != "" && this.state.useParam == true) {
-        console.log(this.state.message, this.state.useParam);
-        return console.log("Stopped!");
-      } */
 
       let hideRequest = true;
 
