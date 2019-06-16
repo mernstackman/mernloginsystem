@@ -115,7 +115,6 @@ const verifyEmail = (req, res, next) => {
   // console.log(process.env.MAIL_USER);
   const user = req.userinfo;
   let a = 0;
-  console.log(user.confirmed, a++);
 
   if (!req.userinfo) {
     return res.status(400).json({
@@ -123,6 +122,7 @@ const verifyEmail = (req, res, next) => {
     });
   }
 
+  console.log(user.confirmed, a++);
   if (user.confirmed == true) {
     return res.status(400).json({
       error: "This user is already verified."

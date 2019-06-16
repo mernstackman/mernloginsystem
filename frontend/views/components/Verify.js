@@ -4,34 +4,93 @@ import { Link } from "react-router-dom";
 import hasher from "./../../../functions/hasher";
 
 class Verify extends Component {
-  constructor({ match }) {
-    super();
-    this.state = {
-      emailToken: "",
-      useParam: false,
-      message: "",
-      error: false,
-      loading: false,
-      email: "",
-      hideRequest: false,
-      wait: false
-    };
-    this.match = match;
-  }
+  constructor(props) {
+    super(props);
+    let emailToken = "",
+      useParam = false,
+      loading = false,
+      hideRequest = false;
 
-  componentWillReceiveProps = props => {
     if (props.match.params.findbyparam) {
       // if this present/ !undefined
-      this.setState({
-        emailToken: props.match.params.findbyparam,
-        useParam: true,
-        loading: true,
-        hideRequest: true
+      emailToken = props.match.params.findbyparam;
+      useParam = true;
+      loading = true;
+      hideRequest = true;
+    }
+
+    this.state = {
+      emailToken,
+      useParam,
+      message: "",
+      error: false,
+      loading,
+      email: "",
+      hideRequest,
+      wait: false
+    };
+    this.match = props.match;
+  }
+
+  verifyEmail = () => {
+    const data = this.state.emailToken ? { emailToken: this.state.emailToken } : "";
+    console.log(this.props.location.state);
+    if (!this.props.location.state && this.state.emailToken != "") {
+      auths.getEmail({ emailToken: this.state.emailToken }).then(response => {
+        if (response.email) {
+          this.setState({ email: response.email });
+        }
+        // console.log(response);
       });
     }
+
+    if (!data) {
+      return this.setState({
+        message: "No valid data is supplied!",
+        error: true,
+        loading: false,
+        hideRequest: false
+      });
+    }
+    // console.log("hasMadeReq", this.state.hasMadeReq);
+
+    auths.verify(data).then(response => {
+      console.log(response);
+      console.log(this.state.message);
+      /*if (this.state.message != "" && this.state.useParam == true) {
+        console.log(this.state.message, this.state.useParam);
+        return console.log("Stopped!");
+      } */
+
+      let hideRequest = true;
+
+      if (response.error && !response.error.includes("already verified.")) {
+        hideRequest = false;
+      }
+
+      if (response.error) {
+        console.log("XXX", response);
+        return this.setState({
+          message: response.error,
+          error: true,
+          hideRequest,
+          loading: false
+        });
+      }
+      if (response.success) {
+        console.log(">>>", response);
+        return this.setState({
+          message: response.success,
+          error: false,
+          hideRequest,
+          loading: false
+        });
+      }
+    });
   };
+
   componentDidMount = () => {
-    if (this.match.params.findbyparam) {
+    /*     if (this.match.params.findbyparam) {
       // if this present/ !undefined
       this.setState({
         emailToken: this.match.params.findbyparam,
@@ -39,6 +98,12 @@ class Verify extends Component {
         loading: true,
         hideRequest: true
       });
+    } */
+
+    let { emailToken, useParam, message } = this.state;
+    if (emailToken != "" && useParam == true && message == "") {
+      console.log(message);
+      this.verifyEmail();
     }
   };
 
@@ -119,53 +184,6 @@ class Verify extends Component {
     console.log("Hide link for 25 seconds");
   };
 
-  verifyEmail = () => {
-    const data = this.state.emailToken ? { emailToken: this.state.emailToken } : "";
-    console.log(this.props.location.state);
-    if (!this.props.location.state && this.state.emailToken != "") {
-      auths.getEmail({ emailToken: this.state.emailToken }).then(response => {
-        if (response.email) {
-          this.setState({ email: response.email });
-        }
-      });
-    }
-
-    if (!data) {
-      return this.setState({
-        message: "No valid data is supplied!",
-        error: true,
-        loading: false,
-        hideRequest: false
-      });
-    }
-
-    auths.verify(data).then(response => {
-      console.log(response);
-      let hideRequest = true;
-      if (!response.error.includes("already verified.")) {
-        hideRequest = false;
-      }
-
-      if (response.error) {
-        return this.setState({
-          message: response.error,
-          error: true,
-          hideRequest,
-          loading: false
-        });
-      }
-      if (response.success) {
-        return this.setState({
-          message: response.success,
-          error: false,
-          hideRequest,
-          loading: false
-        });
-      }
-      console.log(this.state.message);
-    });
-  };
-
   handleSubmit = e => {
     if (!this.state.useParam) e.preventDefault();
     this.setState({ loading: true });
@@ -175,11 +193,7 @@ class Verify extends Component {
   render() {
     if (this.state.emailToken) console.log(this.state.emailToken, "X");
 
-    const { emailToken, useParam, message, loading, error, hideRequest } = {
-      ...this.state
-    };
-
-    emailToken != "" && useParam && message == "" && this.verifyEmail();
+    const { useParam, message, loading, error, hideRequest } = this.state;
 
     let email = "";
     if (this.props.location.state) {

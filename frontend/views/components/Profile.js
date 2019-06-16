@@ -64,11 +64,11 @@ class Profile extends Component {
     }
   };
 
-  componentWillReceiveProps = props => {
+  /* getDerivedStateFromProps = props => {
     const param_id = props.match.params.user_id;
     this.renderCurrentUser(param_id);
     this.canEdit(param_id);
-  };
+  }; */
 
   componentDidMount = () => {
     const param_id = this.match.params.user_id;
