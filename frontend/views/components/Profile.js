@@ -35,23 +35,23 @@ class Profile extends Component {
         return this.setState({
           redirToSignIn: true
         });
-      } else {
-        // console.log(result);
-        const info = {
-          _id: result._id,
-          fullname: result.fullname,
-          username: result.username,
-          email: result.email,
-          created: result.created,
-          updated: result.updated,
-          updateCount: result.updateCount
-        };
-        this.setState({
-          user_id,
-          user: info
-        });
-        return info;
       }
+      // console.log(result);
+      const info = {
+        _id: result._id,
+        fullname: result.fullname,
+        username: result.username,
+        email: result.email,
+        created: result.created,
+        updated: result.updated,
+        confirmed: result.confirmed,
+        updateCount: result.updateCount
+      };
+      this.setState({
+        user_id,
+        user: info
+      });
+      return info;
     });
   };
 
@@ -232,7 +232,7 @@ class Profile extends Component {
       );
     }
     // console.log(this.props.location.pathname);
-    const { _id, fullname, username, email, created } = this.state.user;
+    const { _id, fullname, username, email, created, confirmed } = this.state.user;
     return (
       <div id="profile_view">
         <h1>{fullname}</h1>
@@ -253,6 +253,7 @@ class Profile extends Component {
         </p>
         <p>Joined : {dateformat(created, "dddd, dd mmmm yyyy, HH:mm:ss")}</p>
         <p>ID : {_id}</p>
+        <p>Confirmed : {confirmed == true ? "Yes" : "No"}</p>
         {this.state.canEdit && (
           <div>
             <p>

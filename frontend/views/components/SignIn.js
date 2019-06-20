@@ -26,8 +26,8 @@ class SignIn extends Component {
       password: this.state.password
     };
     auths.signin(data).then(result => {
+      console.log(result);
       if (result.Error) {
-        console.log(result);
         return this.setState({ error: result.Error }); // If error happen, change this
       }
 

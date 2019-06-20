@@ -2,10 +2,14 @@ import auths from "./user-auth";
 
 const auth = {
   isLoggedIn() {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") {
+      return false;
+    }
 
     // parse string to json
-    if (sessionStorage.getItem("jwt")) return JSON.parse(sessionStorage.getItem("jwt"));
+    if (sessionStorage.getItem("jwt")) {
+      return JSON.parse(sessionStorage.getItem("jwt"));
+    }
 
     return false;
   },

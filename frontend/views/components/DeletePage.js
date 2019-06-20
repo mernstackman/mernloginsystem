@@ -1,13 +1,11 @@
-import React, { Component } from "react";
+import React from "react";
 
-class DeletePage extends Component {
-  render() {
-    return (
-      <div>
-        <h1>Your account has been deleted!</h1>
-      </div>
-    );
-  }
+function DeletePage() {
+  return (
+    <div>
+      <h1>Your account has been deleted!</h1>
+    </div>
+  );
 }
 
 export default DeletePage;

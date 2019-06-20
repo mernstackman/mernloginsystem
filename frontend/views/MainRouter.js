@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import { Route, Switch } from "react-router-dom";
+import Notification from "./components/Notification";
+import auth from "./../auth/auth-helper";
 
 import Menu from "./components/Menu";
 import Home from "./components/Home";
@@ -17,6 +19,8 @@ class MainRouter extends Component {
   render() {
     return (
       <div>
+        {// If user is logged in and token is expired and email is not confirmed
+        auth.isLoggedIn() && <Notification />}
         <Menu />
         {/* Routes here */}
         <Switch>
@@ -27,10 +31,8 @@ class MainRouter extends Component {
           <Route path="/register" component={Register} />
           <Route path="/members" component={Members} />
           <Route path="/profile/:user_id" component={Profile} />
-          {/* <Route path="/email/verify/:findbyparam" component={Verify} /> */}
-          {<Route path="/email/:findbyparam" component={Verify} />}
-          {<Route path="/email/" component={Verify} />}
-
+          <Route path="/email/:findbyparam" component={Verify} />
+          <Route path="/email/" component={Verify} />
           <Route path="/signout" component={Signout} />
           <Route path="/deleted" component={DeletePage} />
         </Switch>
