@@ -5,10 +5,10 @@ export class NotifBar extends Component {
   render() {
     const { onClick, actions } = this.props;
     const { message, loading, hideButtons } = actions;
-    console.log(this.props);
+    // console.log(this.props);
 
     return (
-      <Fragment>
+      <div id="notify-top">
         <div className="text">
           {message}
           {loading && (
@@ -27,7 +27,7 @@ export class NotifBar extends Component {
             </button>
           </div>
         )}
-      </Fragment>
+      </div>
     );
   }
 }

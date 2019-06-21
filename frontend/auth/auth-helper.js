@@ -2,6 +2,7 @@ import auths from "./user-auth";
 
 const auth = {
   isLoggedIn() {
+    // if in back end
     if (typeof window === "undefined") {
       return false;
     }

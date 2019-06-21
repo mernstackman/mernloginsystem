@@ -19,8 +19,7 @@ class MainRouter extends Component {
   render() {
     return (
       <div>
-        {// If user is logged in and token is expired and email is not confirmed
-        auth.isLoggedIn() && <Notification />}
+        <Notification />
         <Menu />
         {/* Routes here */}
         <Switch>
@@ -36,7 +35,7 @@ class MainRouter extends Component {
           <Route path="/signout" component={Signout} />
           <Route path="/deleted" component={DeletePage} />
         </Switch>
-        {/* end */}
+        {/* end Routes*/}
       </div>
     );
   }

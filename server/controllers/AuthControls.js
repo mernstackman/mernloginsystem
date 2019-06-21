@@ -5,6 +5,7 @@ import _ from "lodash";
 import { emailRegex, secretKey } from "../../config";
 import { confirmMsg } from "./../../email/emailMessages";
 import sendEmail from "./../../functions/sendEmail";
+import { tokenExpired } from "./../../functions/user";
 
 /* SIGN IN */
 const sign_in = (req, res) => {
@@ -129,10 +130,7 @@ const verifyEmail = (req, res, next) => {
     });
   }
 
-  // Check for token expiration (substract date) <---
-  const currentDate = new Date();
-  const tokenAge = Math.abs(currentDate - user.tokenCreation) / (1000 * 60 * 60);
-  if (tokenAge >= 24) {
+  if (tokenExpired(user.tokenCreation) == true) {
     return res.status(400).json({
       error: "Token expired!"
     });

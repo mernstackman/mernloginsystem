@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import hasher from "./../../../functions/hasher";
+import { tokenExpired } from "./../../../functions/user";
 import { getCurrentUser } from "./../../apis/user-api";
 import auth from "./../../auth/auth-helper";
 import auths from "./../../auth/user-auth";
@@ -11,6 +12,20 @@ class Notification extends Component {
     loading: false,
     hideRequest: false,
     hideButtons: false
+  };
+
+  componentDidUpdate(prevProps, prevState) {}
+
+  showNotification = () => {
+    if (!auth.isLoggedIn()) {
+      return false;
+    }
+    const { confirmed, tokenCreation } = auth.isLoggedIn().loggedIn_user;
+    const expired = tokenExpired(new Date(tokenCreation));
+    if (confirmed == false && expired == true) {
+      return true;
+    }
+    return false;
   };
 
   handleCLick = e => {
@@ -95,12 +110,9 @@ class Notification extends Component {
   };
 
   render() {
-    if (this.state.hideRequest == true) return "";
-    return (
-      <div id="notify-top">
-        <NotifBar actions={this.state} onClick={this.handleCLick} />
-      </div>
-    );
+    // If user is logged in and token is expired and email is not confirmed
+    if (this.state.hideRequest == true || !this.showNotification()) return "";
+    return <NotifBar actions={this.state} onClick={this.handleCLick} />;
   }
 }
 
