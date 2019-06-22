@@ -1,18 +1,21 @@
 import React, { Component } from "react";
 import hasher from "./../../../functions/hasher";
 import { tokenExpired } from "./../../../functions/user";
-import { getCurrentUser } from "./../../apis/user-api";
+// import { getCurrentUser } from "./../../apis/user-api";
 import auth from "./../../auth/auth-helper";
 import auths from "./../../auth/user-auth";
 import NotifBar from "./NotifBar";
 
 class Notification extends Component {
-  state = {
-    message: "Your email address need to be verified.",
-    loading: false,
-    hideRequest: false,
-    hideButtons: false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: "Your email address need to be verified.",
+      loading: false,
+      hideButtons: false
+    };
+    // console.log(props.hideReq);
+  }
 
   componentDidUpdate(prevProps, prevState) {}
 
@@ -33,7 +36,7 @@ class Notification extends Component {
 
     // close notification bar
     if (className == "close") {
-      return this.setState({ hideRequest: true });
+      return this.props.shouldHideNotif(true);
     }
 
     if (className == "verify") {
@@ -46,6 +49,7 @@ class Notification extends Component {
       this.setState({ loading: true });
       // save them to database
       auths.updateMailToken({ email, mailToken, mailSalt, tokenCreation }).then(response => {
+        this.props.shouldHideNotif(false);
         if (response.verified) {
           return this.setState({ message: response.verified, loading: false, hideButtons: false });
         }
@@ -53,7 +57,6 @@ class Notification extends Component {
         if (response.error) {
           return this.setState({
             message: response.error,
-            hideRequest: false,
             loading: false,
             hideButtons: false
           });
@@ -111,7 +114,8 @@ class Notification extends Component {
 
   render() {
     // If user is logged in and token is expired and email is not confirmed
-    if (this.state.hideRequest == true || !this.showNotification()) return "";
+    console.log(this.props.hideReq);
+    if (this.props.hideReq == true || !this.showNotification()) return "";
     return <NotifBar actions={this.state} onClick={this.handleCLick} />;
   }
 }

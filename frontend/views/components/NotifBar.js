@@ -13,7 +13,8 @@ export class NotifBar extends Component {
           {message}
           {loading && (
             <Fragment>
-              <img src={loadingGIF} />{" "}
+              {" "}
+              <img src={loadingGIF} />
             </Fragment>
           )}
         </div>

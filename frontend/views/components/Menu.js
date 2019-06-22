@@ -1,7 +1,6 @@
 import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
 import auth from "./../../auth/auth-helper";
-import Notification from "./Notification";
 
 const Menu = props => {
   let user_id = "";
@@ -25,6 +24,7 @@ const Menu = props => {
           <button
             onClick={() => {
               auth.signOut(() => {
+                props.onSignout(false);
                 return props.history.push("/signout");
               });
             }}

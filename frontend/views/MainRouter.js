@@ -16,11 +16,17 @@ import DeletePage from "./components/DeletePage";
 import Verify from "./components/Verify";
 
 class MainRouter extends Component {
+  state = {
+    hideReq: false
+  };
+  shouldHideNotif = action => {
+    this.setState({ hideReq: action });
+  };
   render() {
     return (
       <div>
-        <Notification />
-        <Menu />
+        <Notification hideReq={this.state.hideReq} shouldHideNotif={this.shouldHideNotif} />
+        <Menu onSignout={this.shouldHideNotif} />
         {/* Routes here */}
         <Switch>
           <Route exact path="/" component={Home} />
