@@ -51,7 +51,7 @@ const verify = data => {
 };
 
 const getEmail = data => {
-  return fetch("/email/verify/" + data.emailToken, {
+  return fetch("/email/verify/" + data.content, {
     method: "GET",
     headers: {
       Accept: "text/html",
@@ -69,6 +69,40 @@ const getEmail = data => {
 
 const updateMailToken = data => {
   return fetch("/email/" + data.email, {
+    method: "PUT",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  })
+    .then(response => {
+      return response.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+const checkByValue = data => {
+  return fetch("/value/check/" + data.content, {
+    method: "GET",
+    headers: {
+      Accept: "text/html",
+      "Content-Type": "application/json"
+    }
+  })
+    .then(response => {
+      console.log(response);
+      return response.json();
+    })
+    .catch(err => {
+      console.log(err);
+    });
+};
+
+const createResetToken = data => {
+  return fetch("/password/update", {
     method: "PUT",
     headers: {
       Accept: "application/json",
@@ -102,5 +136,14 @@ const sendTheEmail = data => {
     });
 };
 
-const auths = { signin, signout, verify, getEmail, updateMailToken, sendTheEmail };
+const auths = {
+  signin,
+  signout,
+  verify,
+  getEmail,
+  updateMailToken,
+  sendTheEmail,
+  checkByValue,
+  createResetToken
+};
 export default auths;

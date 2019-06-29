@@ -30,14 +30,22 @@ class Verify extends Component {
       hideRequest,
       wait: false
     };
-    this.match = props.match;
+    // this.match = props.match;
   }
+
+  componentDidMount = () => {
+    let { emailToken, useParam, message } = this.state;
+    if (emailToken != "" && useParam == true && message == "") {
+      console.log(message);
+      this.verifyEmail();
+    }
+  };
 
   verifyEmail = () => {
     const data = this.state.emailToken ? { emailToken: this.state.emailToken } : "";
     console.log(this.props.location.state);
     if (!this.props.location.state && this.state.emailToken != "") {
-      auths.getEmail({ emailToken: this.state.emailToken }).then(response => {
+      auths.getEmail({ content: this.state.emailToken }).then(response => {
         if (response.email) {
           this.setState({ email: response.email });
         }
@@ -84,24 +92,6 @@ class Verify extends Component {
         });
       }
     });
-  };
-
-  componentDidMount = () => {
-    /*     if (this.match.params.findbyparam) {
-      // if this present/ !undefined
-      this.setState({
-        emailToken: this.match.params.findbyparam,
-        useParam: true,
-        loading: true,
-        hideRequest: true
-      });
-    } */
-
-    let { emailToken, useParam, message } = this.state;
-    if (emailToken != "" && useParam == true && message == "") {
-      console.log(message);
-      this.verifyEmail();
-    }
   };
 
   handleChange = e => {

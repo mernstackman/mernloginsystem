@@ -14,6 +14,7 @@ import Profile from "./components/Profile";
 import Signout from "./components/SignOut";
 import DeletePage from "./components/DeletePage";
 import Verify from "./components/Verify";
+import ResetPassword from "./components/ResetPassword";
 
 class MainRouter extends Component {
   state = {
@@ -40,6 +41,8 @@ class MainRouter extends Component {
           <Route path="/email/" component={Verify} />
           <Route path="/signout" component={Signout} />
           <Route path="/deleted" component={DeletePage} />
+          <Route path="/password/recovery/:findbyparam" component={ResetPassword} />
+          <Route path="/password/recovery/" component={ResetPassword} />
         </Switch>
         {/* end Routes*/}
       </div>

@@ -42,6 +42,7 @@ const UserSchema = new Schema({
     type: Date,
     default: new Date()
   },
+  pwResetToken: String,
   salt: String,
   mailSalt: String,
   updated: Date,

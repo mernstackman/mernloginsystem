@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import express_jwt from "express-jwt";
 import _ from "lodash";
 import { emailRegex, secretKey } from "../../config";
-import { confirmMsg } from "./../../email/emailMessages";
+import { confirmMsg, resetPwMsg } from "./../../email/emailMessages";
 import sendEmail from "./../../functions/sendEmail";
 import { tokenExpired } from "./../../functions/user";
 
@@ -73,8 +73,13 @@ const findByParam = (req, res, next, param) => {
   /*   if (param == "send") {
     return;
   } */
+  // console.log(req.headers);
   let parameter = {};
-  if (emailRegex.test(param)) {
+  if (req.query.pwResetToken) {
+    const email = Buffer.from(req.query.pwResetToken, "base64");
+    console.log(email, email.toString());
+    parameter = { email };
+  } else if (emailRegex.test(param)) {
     parameter = { email: param };
   } else {
     parameter = { mailToken: param };
@@ -94,9 +99,12 @@ const findByParam = (req, res, next, param) => {
 };
 
 const checkUserinfo = (req, res, next) => {
-  // console.log("req.body");
-
-  next();
+  if (!req.userinfo) {
+    return res.status(400).json({
+      error: "No user found!"
+    });
+  }
+  return res.json(req.userinfo);
 };
 
 const mailFromToken = (req, res, next) => {
@@ -191,14 +199,43 @@ const updateEmailToken = (req, res) => {
     });
 };
 
+const createResetToken = (req, res) => {
+  // prevent duplicate request - the only way
+  req.connection.setTimeout(1000 * 60 * 10);
+
+  const { email, pwResetToken } = req.body;
+
+  UserModel.findOneAndUpdate({ email }, { $set: { pwResetToken } }, { upsert: true, new: true })
+    .select("-password_hash -salt -mailToken -mailSalt -tokenCreation")
+    .exec((error, user) => {
+      if (error) {
+        return res.status(400).json({
+          error: "There are problem when attempting to save the data!"
+        });
+      }
+      return res.status(200).json({
+        user,
+        success: "Please check your email's inbox or spam folder for reset password link!"
+      });
+    });
+};
+
 const sendTheEmail = (req, res) => {
   // prevent duplicate request - the only way
   req.connection.setTimeout(1000 * 60 * 10);
 
+  let msgBody = {};
+  if (req.body.mailToken) {
+    msgBody = confirmMsg(req.body.mailToken);
+  } else if (req.body.resetToken) {
+    const encMail = Buffer.from(req.body.email).toString("base64");
+    msgBody = resetPwMsg(req.body.resetToken + "/?pwResetToken=" + encMail);
+  }
+  console.log(req.body);
   const emaildata = {
     from: `"MERN Stack Email" ${process.env.MAIL_USER}`,
     to: /* req.body.email */ "mernstackweb@gmail.com",
-    ...confirmMsg(req.body.mailToken)
+    ...msgBody
   };
   console.log(emaildata);
   sendEmail(emaildata).then(response => {
@@ -216,5 +253,6 @@ export default {
   mailFromToken,
   updateEmailToken,
   sendTheEmail,
-  checkUserinfo
+  checkUserinfo,
+  createResetToken
 };
