@@ -2,6 +2,7 @@
 const tokenExpired = tokenCreation => {
   const currentDate = new Date();
   const tokenAge = Math.abs(currentDate - tokenCreation) / (1000 * 60 * 60);
+  console.log("Token age ->", tokenAge);
   if (tokenAge >= 24) {
     return true;
   }

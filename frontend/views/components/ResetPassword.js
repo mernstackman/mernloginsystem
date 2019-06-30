@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from "react";
 import auths from "./../../auth/user-auth";
 import hasher from "./../../../functions/hasher";
+import { tokenExpired } from "./../../../functions/user";
 import eclipseGIF from "./../../img/eclipse.gif";
 
 import CheckEmail from "./CheckEmail";
@@ -43,13 +44,24 @@ class ResetPassword extends Component {
       console.log("Token in url");
       auths.checkByValue({ content: this.state.urlToken + this.state.query }).then(response => {
         console.log(response);
-        // Checking if token is valid and or expired require parsing json string.
         if (response.error) {
           return this.setState({
             tokenValid: false,
             checkEmail: true,
             error: "Token is not valid!"
           });
+        }
+
+        // CHECKING IF TOKEN IS VALID AND OR EXPIRED REQUIRE PARSING JSON STRING.
+        if (response.pwResetToken) {
+          const { mailSalt, resetToken, tokenCreation } = JSON.parse(response.pwResetToken);
+          if (resetToken != this.state.urlToken || tokenExpired(new Date(tokenCreation))) {
+            return this.setState({
+              tokenValid: false,
+              checkEmail: true,
+              error: "Token is not valid!"
+            });
+          }
         }
         this.setState({ tokenValid: true, checkEmail: false });
       });
@@ -141,7 +153,7 @@ class ResetPassword extends Component {
 
   render() {
     const { error, success, tokenValid, checkEmail, loading } = this.state;
-
+    console.log(error);
     if (tokenValid == false || checkEmail == true) {
       return (
         <Fragment>
