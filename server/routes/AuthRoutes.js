@@ -7,7 +7,7 @@ router.route("/api/signin").post(authCtrl.sign_in);
 router.route("/api/signout").get(authCtrl.sign_out);
 router.route("/email/verify/:findbyparam").get(authCtrl.mailFromToken);
 router.route("/value/check/:findbyparam").get(authCtrl.checkUserinfo);
-router.route("/password/update").put(authCtrl.createResetToken);
+router.route("/password/update").put(authCtrl.updateByEmail);
 //   .post(authCtrl.verifyEmail);
 router
   .route("/email/:findbyparam")

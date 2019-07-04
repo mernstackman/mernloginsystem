@@ -42,10 +42,12 @@ class Verify extends Component {
   };
 
   verifyEmail = () => {
-    const data = this.state.emailToken ? { emailToken: this.state.emailToken } : "";
+    const data = this.state.emailToken
+      ? { emailToken: this.state.emailToken + "/?emailToken" }
+      : "";
     console.log(this.props.location.state);
     if (!this.props.location.state && this.state.emailToken != "") {
-      auths.getEmail({ content: this.state.emailToken }).then(response => {
+      auths.getEmail({ content: this.state.emailToken + "/?emailToken" }).then(response => {
         if (response.email) {
           this.setState({ email: response.email });
         }
@@ -116,56 +118,58 @@ class Verify extends Component {
     this.setState({ hideRequest: true, loading: true });
 
     // Update the database record
-    auths.updateMailToken({ email, mailToken, mailSalt, tokenCreation }).then(response => {
-      console.log(response);
-      if (response.verified) {
-        return this.setState({ message: response.verified, loading: false });
-      }
-      if (response.error) {
-        return this.setState({ message: response.error, hideRequest: false, loading: false });
-      }
-      // if Success
-      if (response.success) {
-        console.log("Before send email");
+    auths
+      .updateMailToken({ email: email + "/?email", mailToken, mailSalt, tokenCreation })
+      .then(response => {
+        console.log(response);
+        if (response.verified) {
+          return this.setState({ message: response.verified, loading: false });
+        }
+        if (response.error) {
+          return this.setState({ message: response.error, hideRequest: false, loading: false });
+        }
+        // if Success
+        if (response.success) {
+          console.log("Before send email");
 
-        // Send to the user's email
-        auths.sendTheEmail(data).then(res => {
-          if (!res) {
-            return this.setState({
-              message: "Something went wrong.. Please contact us!",
-              loading: false
-            });
-          }
+          // Send to the user's email
+          auths.sendTheEmail(data).then(res => {
+            if (!res) {
+              return this.setState({
+                message: "Something went wrong.. Please contact us!",
+                loading: false
+              });
+            }
 
-          const { accepted, rejected } = res.response;
-          console.log(accepted[1], accepted.length, rejected);
-          if (accepted.length == 1) {
-            return this.setState({
-              message:
-                "Email sent! Please check your email's inbox or spam folder for the new verification link!",
-              loading: false
-            });
-          }
-          if (rejected.length == 1) {
-            return this.setState({
-              message: "Something went wrong.. Please contact us!",
-              loading: false
-            });
-          }
-        });
-        console.log("after send email");
+            const { accepted, rejected } = res.response;
+            console.log(accepted[1], accepted.length, rejected);
+            if (accepted.length == 1) {
+              return this.setState({
+                message:
+                  "Email sent! Please check your email's inbox or spam folder for the new verification link!",
+                loading: false
+              });
+            }
+            if (rejected.length == 1) {
+              return this.setState({
+                message: "Something went wrong.. Please contact us!",
+                loading: false
+              });
+            }
+          });
+          console.log("after send email");
 
-        // Tell user to wait for 10 minutes before the next request
-        setTimeout(() => {
-          this.setState({ hideRequest: false, wait: false });
-        }, 1000 * 60 * 0.25);
-        return this.setState({
-          message: "Please wait while we are sending new verification email!",
-          wait: true,
-          loading: true
-        });
-      }
-    });
+          // Tell user to wait for 10 minutes before the next request
+          setTimeout(() => {
+            this.setState({ hideRequest: false, wait: false });
+          }, 1000 * 60 * 0.25);
+          return this.setState({
+            message: "Please wait while we are sending new verification email!",
+            wait: true,
+            loading: true
+          });
+        }
+      });
 
     // Hide link - Wait 10 minutes before another request can be made
     console.log("Hide link for 25 seconds");

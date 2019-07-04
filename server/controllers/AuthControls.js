@@ -69,24 +69,24 @@ const currentUserOnly = (req, res, next) => {
 };
 
 const findByParam = (req, res, next, param) => {
-  // console.log(param);
-  /*   if (param == "send") {
-    return;
-  } */
-  // console.log(req.headers);
-  let parameter = {};
-  if (req.query.pwResetToken) {
-    const email = Buffer.from(req.query.pwResetToken, "base64");
-    console.log(email, email.toString());
-    parameter = { email };
-  } else if (emailRegex.test(param)) {
-    parameter = { email: param };
-  } else {
-    parameter = { mailToken: param };
+  // Make this more flexible and simpler using query value
+  let select = "-password_hash -salt";
+  if (req.query.password) {
+    select = "";
   }
 
+  let value = param;
+  let key = Object.keys(req.query)[0];
+  if (req.query.pwResetToken) {
+    const email = Buffer.from(req.query.pwResetToken, "base64");
+    value = email.toString();
+    key = "email";
+  }
+  const parameter = { [key]: value };
+  console.log(parameter);
+
   UserModel.findOne(parameter)
-    .select("-password_hash -salt")
+    .select(select)
     .exec((error, user) => {
       if (error) {
         return res.status(400).json({
@@ -199,14 +199,18 @@ const updateEmailToken = (req, res) => {
     });
 };
 
-const createResetToken = (req, res) => {
+const updateByEmail = (req, res) => {
   // prevent duplicate request - the only way
   req.connection.setTimeout(1000 * 60 * 10);
+  const { email, update } = req.body;
 
-  const { email, pwResetToken } = req.body;
+  let success = "Please check your email's inbox or spam folder for reset password link!";
+  if (req.body.update.password_hash) {
+    success = "Password updated!";
+  }
 
-  UserModel.findOneAndUpdate({ email }, { $set: { pwResetToken } }, { upsert: true, new: true })
-    .select("-password_hash -salt -mailToken -mailSalt -tokenCreation")
+  UserModel.findOneAndUpdate({ email }, { $set: update }, { upsert: true, new: true })
+    // .select("-password_hash -salt -mailToken -mailSalt -tokenCreation")
     .exec((error, user) => {
       if (error) {
         return res.status(400).json({
@@ -215,7 +219,7 @@ const createResetToken = (req, res) => {
       }
       return res.status(200).json({
         user,
-        success: "Please check your email's inbox or spam folder for reset password link!"
+        success
       });
     });
 };
@@ -234,7 +238,7 @@ const sendTheEmail = (req, res) => {
   console.log(req.body);
   const emaildata = {
     from: `"MERN Stack Email" ${process.env.MAIL_USER}`,
-    to: /* req.body.email */ "mernstackweb@gmail.com",
+    to: /* req.body.email */ "mernwebdev@gmail.com",
     ...msgBody
   };
   console.log(emaildata);
@@ -254,5 +258,5 @@ export default {
   updateEmailToken,
   sendTheEmail,
   checkUserinfo,
-  createResetToken
+  updateByEmail
 };

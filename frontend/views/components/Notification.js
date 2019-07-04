@@ -48,67 +48,73 @@ class Notification extends Component {
 
       this.setState({ loading: true });
       // save them to database
-      auths.updateMailToken({ email, mailToken, mailSalt, tokenCreation }).then(response => {
-        this.props.shouldHideNotif(false);
-        if (response.verified) {
-          return this.setState({ message: response.verified, loading: false, hideButtons: false });
-        }
+      auths
+        .updateMailToken({ email: email + "/?email", mailToken, mailSalt, tokenCreation })
+        .then(response => {
+          this.props.shouldHideNotif(false);
+          if (response.verified) {
+            return this.setState({
+              message: response.verified,
+              loading: false,
+              hideButtons: false
+            });
+          }
 
-        if (response.error) {
-          return this.setState({
-            message: response.error,
-            loading: false,
-            hideButtons: false
-          });
-        }
+          if (response.error) {
+            return this.setState({
+              message: response.error,
+              loading: false,
+              hideButtons: false
+            });
+          }
 
-        // if Success
-        if (response.success) {
-          console.log("Before send email");
-          // Send to the user's email
-          auths.sendTheEmail(data).then(res => {
-            if (!res) {
-              return this.setState({
-                message: "Something went wrong.. Please try again or contact us!",
-                loading: false,
-                hideButtons: false
-              });
-            }
+          // if Success
+          if (response.success) {
+            console.log("Before send email");
+            // Send to the user's email
+            auths.sendTheEmail(data).then(res => {
+              if (!res) {
+                return this.setState({
+                  message: "Something went wrong.. Please try again or contact us!",
+                  loading: false,
+                  hideButtons: false
+                });
+              }
 
-            const { accepted, rejected } = res.response;
-            console.log(accepted[1], accepted.length, rejected);
+              const { accepted, rejected } = res.response;
+              console.log(accepted[1], accepted.length, rejected);
 
-            if (accepted.length == 1) {
-              // Close notification bar
-              /*  setTimeout(() => {
+              if (accepted.length == 1) {
+                // Close notification bar
+                /*  setTimeout(() => {
                 this.setState({ hideRequest: true });
               }, 1000 * 60 * 0.05); */
 
-              return this.setState({
-                message:
-                  "Email sent! Please check your email's inbox or spam folder for the new verification link!",
-                loading: false,
-                hideButtons: true
-              });
-            }
+                return this.setState({
+                  message:
+                    "Email sent! Please check your email's inbox or spam folder for the new verification link!",
+                  loading: false,
+                  hideButtons: true
+                });
+              }
 
-            if (rejected.length == 1) {
-              return this.setState({
-                message: "Something went wrong.. Please try again or contact us!",
-                loading: false,
-                hideButtons: false
-              });
-            }
-          });
-          console.log("after send email");
+              if (rejected.length == 1) {
+                return this.setState({
+                  message: "Something went wrong.. Please try again or contact us!",
+                  loading: false,
+                  hideButtons: false
+                });
+              }
+            });
+            console.log("after send email");
 
-          return this.setState({
-            message: "Please wait while new verification email is sent!",
-            loading: true,
-            hideButtons: true
-          });
-        }
-      });
+            return this.setState({
+              message: "Please wait while new verification email is sent!",
+              loading: true,
+              hideButtons: true
+            });
+          }
+        });
     }
   };
 

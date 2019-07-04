@@ -27,12 +27,6 @@ const signout = () => {
 // To be called on the front end
 // Get from front end and send it to backend
 const verify = data => {
-  /*   console.log(data);
-  if (!data) {
-    return new Promise((resolve, reject) => {
-      resolve({ error: "No valid data!" });
-    });
-  } */
   const emailToken = data.emailToken ? data.emailToken : "";
   return fetch("/email/" + emailToken, {
     method: "POST",
@@ -85,7 +79,7 @@ const updateMailToken = data => {
 };
 
 const checkByValue = data => {
-  return fetch("/value/check/" + data.content, {
+  return fetch("/value/check/" + data.value, {
     method: "GET",
     headers: {
       Accept: "text/html",
@@ -101,7 +95,7 @@ const checkByValue = data => {
     });
 };
 
-const createResetToken = data => {
+const updateByEmail = data => {
   return fetch("/password/update", {
     method: "PUT",
     headers: {
@@ -144,6 +138,6 @@ const auths = {
   updateMailToken,
   sendTheEmail,
   checkByValue,
-  createResetToken
+  updateByEmail
 };
 export default auths;
