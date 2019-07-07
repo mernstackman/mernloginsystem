@@ -28,15 +28,26 @@ const create = (req, res, next) => {
 
 // LIST USER
 const list = (req, res) => {
+  let total = 0;
+  UserModel.estimatedDocumentCount().then(resp => {
+    total = resp;
+  });
+
+  const limit = parseInt(req.query.perPage) || 2;
+  const skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
+  console.log(skip);
+
   UserModel.find({}, (err, users) => {
     if (err) {
       return res.status(400).json({
         error: "Error occured!"
       });
     }
-
-    return res.status(200).json(users);
-  }).select("fullname email username created");
+    return res.status(200).json({ total, users, skip });
+  })
+    .skip(skip)
+    .limit(limit)
+    .select("fullname email username created");
 };
 
 // CLEAN ALL USERS

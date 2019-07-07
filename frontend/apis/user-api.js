@@ -33,8 +33,8 @@ const checkAvailability = data => {
     .catch(err => console.log(err));
 };
 
-const list = () => {
-  return fetch("/api/users", {
+const list = req => {
+  return fetch("/api/users/" + req.query, {
     method: "GET"
   })
     .then(response => {
