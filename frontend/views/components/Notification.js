@@ -120,7 +120,7 @@ class Notification extends Component {
 
   render() {
     // If user is logged in and token is expired and email is not confirmed
-    console.log(this.props.hideReq);
+    // console.log(this.props.hideReq);
     if (this.props.hideReq == true || !this.showNotification()) return "";
     return <NotifBar actions={this.state} onClick={this.handleCLick} />;
   }

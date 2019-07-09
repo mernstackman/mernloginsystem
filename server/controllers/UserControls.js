@@ -33,9 +33,9 @@ const list = (req, res) => {
     total = resp;
   });
 
-  const limit = parseInt(req.query.perPage) || 2;
+  const limit = parseInt(req.query.perPage) || 10;
   const skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
-  console.log(skip);
+  console.log(skip, limit);
 
   UserModel.find({}, (err, users) => {
     if (err) {
@@ -67,9 +67,7 @@ const user_id = (req, res, next, id) => {
           error: "Cannot retrieve user with that id!"
         });
       }
-
       req.userinfo = user;
-
       next();
     });
 };
