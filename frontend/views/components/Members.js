@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import { list } from "./../../apis/user-api";
 import { Link } from "react-router-dom";
 import Pagination from "./Pagination";
+import bigloader from "./../../img/bigloader.gif";
 
 class Members extends Component {
   constructor(props) {
@@ -16,7 +17,8 @@ class Members extends Component {
       users: [],
       limit,
       skip,
-      total: 0
+      total: 0,
+      loading: true
     };
   }
 
@@ -28,12 +30,15 @@ class Members extends Component {
       if (data.error) {
         return this.setState({ error: data.error });
       }
-      return this.setState({ total: data.total, users: data.users });
+      return this.setState({ loading: false, total: data.total, users: data.users });
     });
   }
 
   handleClick = e => {
     e.preventDefault();
+    this.setState({
+      loading: true
+    });
     const skipnum = this.state.limit * (parseInt(e.value) - 1);
     console.log(skipnum);
 
@@ -42,14 +47,19 @@ class Members extends Component {
       if (data.error) {
         return this.setState({ error: data.error });
       }
-      return this.setState({ skip: e.value, users: data.users });
+      return this.setState({ loading: false, skip: e.value, users: data.users });
     });
   };
 
   render() {
     // console.log(this.state.total);
     return (
-      <div>
+      <div id="member-list">
+        {this.state.loading && (
+          <div id="loading-background">
+            <img src={bigloader} alt="big loading gif" />
+          </div>
+        )}
         {this.state.users.map((user, index) => {
           return (
             <div key={user._id} className="user-item">

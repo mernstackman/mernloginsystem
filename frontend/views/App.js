@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import Notification from "./components/Notification";
 import auth from "./../auth/auth-helper";
 import "./../sass/style.scss";
+import "./../sass/pagination.scss";
 
 class App extends Component {
   render() {
