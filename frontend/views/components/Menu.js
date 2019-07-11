@@ -10,7 +10,7 @@ const Menu = props => {
 
   const redirTo = () => {
     if (props.location.pathname == "/members") {
-      window.location.reload();
+      window.location.href = "/members";
     }
   };
 

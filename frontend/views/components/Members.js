@@ -11,12 +11,12 @@ class Members extends Component {
 
     const query = qs.parse(props.location.search);
     const limit = query.pp || query.perPage || 10;
-    const skip = query.pn || query.pageNum || 1;
+    const pagenum = query.pn || query.pageNum || 1;
 
     this.state = {
       users: [],
       limit,
-      skip,
+      pagenum,
       total: 0,
       loading: true,
       pageTitle: "Members"
@@ -25,8 +25,8 @@ class Members extends Component {
 
   componentDidMount() {
     document.title = this.props.title;
-    const { limit, skip } = this.state;
-    const query = "?perPage=" + limit + "&pageNum=" + skip;
+    const { limit, pagenum } = this.state;
+    const query = "?perPage=" + limit + "&pageNum=" + pagenum;
     console.log(query);
     list({ query }).then(data => {
       if (data.error) {
@@ -42,8 +42,8 @@ class Members extends Component {
     this.setState({
       loading: true
     });
-    const skipnum = this.state.limit * (parseInt(e.value) - 1);
-    console.log(skipnum);
+    // const skipnum = this.state.limit * (parseInt(e.value) - 1);
+    // console.log(skipnum);
 
     const query = "?perPage=" + this.state.limit + "&pageNum=" + e.value;
 
@@ -55,7 +55,7 @@ class Members extends Component {
         history.pushState(null, "", "/members/" + query);
       }
       document.title = `Members | Page ${e.value}`;
-      return this.setState({ loading: false, skip: e.value, users: data.users });
+      return this.setState({ loading: false, pagenum: e.value, users: data.users });
     });
   };
 
@@ -73,7 +73,7 @@ class Members extends Component {
             <div key={user._id} className="user-item">
               {index +
                 1 +
-                ((parseInt(this.state.skip) - 1) * parseInt(this.state.limit) || 0) +
+                ((parseInt(this.state.pagenum) - 1) * parseInt(this.state.limit) || 0) +
                 ". " +
                 user.username}{" "}
               <Link to={"/profile/" + user._id}>
@@ -84,7 +84,11 @@ class Members extends Component {
           );
         })}
 
-        <Pagination handleClick={this.handleClick} pageLength={this.state.total} />
+        <Pagination
+          handleClick={this.handleClick}
+          pageLength={this.state.total}
+          pagenum={this.state.pagenum}
+        />
       </div>
     );
   }
