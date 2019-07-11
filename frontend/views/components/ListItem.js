@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const ListItem = props => {
@@ -11,9 +11,9 @@ const ListItem = props => {
 
   return (
     <li className={props.className} onClick={thisClick}>
-      <Link to={props.url} onClick={thisClick}>
+      <NavLink to={props.url} onClick={thisClick}>
         {props.content}
-      </Link>
+      </NavLink>
     </li>
   );
 };

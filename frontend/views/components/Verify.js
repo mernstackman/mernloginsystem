@@ -34,6 +34,7 @@ class Verify extends Component {
   }
 
   componentDidMount = () => {
+    document.title = this.props.title;
     let { emailToken, useParam, message } = this.state;
     if (emailToken != "" && useParam == true && message == "") {
       console.log(message);

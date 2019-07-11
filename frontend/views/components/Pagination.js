@@ -4,10 +4,22 @@ import PropTypes from "prop-types";
 import ListItem from "./ListItem";
 
 class Pagination extends Component {
-  render() {
+  constructor(props) {
+    super(props);
+    this.state = {
+      list: []
+    };
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.generateListItem(nextProps.pageLength);
+  }
+
+  generateListItem = length => {
+    console.log(list);
     const list = [];
     let item = null;
-    for (let i = 0; i < this.props.totalData; i++) {
+    for (let i = 0; i < length; i++) {
       item = (
         <ListItem
           className="list-item"
@@ -20,12 +32,17 @@ class Pagination extends Component {
       );
       list.push(item);
     }
-    return <ul className="pagination">{list}</ul>;
+    return this.setState({ list });
+  };
+
+  render() {
+    console.log(this.state.list);
+    return <ul className="pagination">{this.state.list}</ul>;
   }
 }
 
 Pagination.propTypes = {
-  totalData: PropTypes.number.isRequired,
+  pageLength: PropTypes.number.isRequired,
   handleClick: PropTypes.func.isRequired
 };
 

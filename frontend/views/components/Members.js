@@ -10,19 +10,21 @@ class Members extends Component {
     super(props);
 
     const query = qs.parse(props.location.search);
-    const limit = query.pp || 10;
-    const skip = query.pn || 1;
+    const limit = query.pp || query.perPage || 10;
+    const skip = query.pn || query.pageNum || 1;
 
     this.state = {
       users: [],
       limit,
       skip,
       total: 0,
-      loading: true
+      loading: true,
+      pageTitle: "Members"
     };
   }
 
   componentDidMount() {
+    document.title = this.props.title;
     const { limit, skip } = this.state;
     const query = "?perPage=" + limit + "&pageNum=" + skip;
     console.log(query);
@@ -30,7 +32,8 @@ class Members extends Component {
       if (data.error) {
         return this.setState({ error: data.error });
       }
-      return this.setState({ loading: false, total: data.total, users: data.users });
+      const total = Math.floor(data.total / (limit || 10));
+      return this.setState({ loading: false, total, users: data.users });
     });
   }
 
@@ -43,16 +46,21 @@ class Members extends Component {
     console.log(skipnum);
 
     const query = "?perPage=" + this.state.limit + "&pageNum=" + e.value;
+
     list({ query }).then(data => {
       if (data.error) {
         return this.setState({ error: data.error });
       }
+      if (history.pushState) {
+        history.pushState(null, "", "/members/" + query);
+      }
+      document.title = `Members | Page ${e.value}`;
       return this.setState({ loading: false, skip: e.value, users: data.users });
     });
   };
 
   render() {
-    // console.log(this.state.total);
+    console.log(this.state.total);
     return (
       <div id="member-list">
         {this.state.loading && (
@@ -76,10 +84,7 @@ class Members extends Component {
           );
         })}
 
-        <Pagination
-          handleClick={this.handleClick}
-          totalData={Math.floor(this.state.total / (this.state.limit || 10))}
-        />
+        <Pagination handleClick={this.handleClick} pageLength={this.state.total} />
       </div>
     );
   }

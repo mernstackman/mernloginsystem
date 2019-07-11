@@ -10,6 +10,10 @@ This script is not yet completed. There are several features that needs to be ad
 */
 
 class SignUp extends Component {
+  componentDidMount() {
+    document.title = this.props.title;
+  }
+
   state = {
     fullname: "",
     username: "",

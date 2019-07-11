@@ -8,10 +8,20 @@ const Menu = props => {
     user_id = auth.isLoggedIn().loggedIn_user._id; // Get it from sessionStorage
   }
 
+  const redirTo = () => {
+    if (props.location.pathname == "/members") {
+      window.location.reload();
+    }
+  };
+
   return (
     <nav id="main_nav">
       <NavLink to="/">Home</NavLink> | <NavLink to="/about">About</NavLink> |{" "}
-      <NavLink to="/contact">Contact</NavLink> | <NavLink to="/members">Members</NavLink> |{" "}
+      <NavLink to="/contact">Contact</NavLink> |{" "}
+      <NavLink onClick={redirTo} to="/members">
+        Members
+      </NavLink>{" "}
+      |{" "}
       {!auth.isLoggedIn() && (
         <span>
           <NavLink to="/register">Sign Up</NavLink> |

@@ -43,6 +43,7 @@ class ResetPassword extends Component {
   }
 
   componentDidMount() {
+    document.title = this.props.title;
     // Determine which form to display
     if (this.state.urlToken) {
       console.log("Token in url");

@@ -2,6 +2,10 @@ import React, { Component } from "react";
 import { Link } from "react-router-dom";
 
 class SignOut extends Component {
+  componentDidMount() {
+    document.title = this.props.title;
+  }
+
   render() {
     return (
       <div>

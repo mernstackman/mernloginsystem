@@ -7,6 +7,10 @@ import "./../sass/style.scss";
 import "./../sass/pagination.scss";
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+  }
+
   render() {
     // <BrowserRouter>{auth.isLoggedIn() && <Notification />}</BrowserRouter>
     return (

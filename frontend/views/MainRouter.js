@@ -30,19 +30,31 @@ class MainRouter extends Component {
         <Menu onSignout={this.shouldHideNotif} />
         {/* Routes here */}
         <Switch>
-          <Route exact path="/" component={Home} />
-          <Route path="/about" component={About} />
-          <Route path="/contact" component={Contact} />
-          <Route path="/signin" component={Signin} />
-          <Route path="/register" component={Register} />
-          <Route path="/members" component={Members} />
-          <Route path="/profile/:user_id" component={Profile} />
-          <Route path="/email/:findbyparam" component={Verify} />
-          <Route path="/email/" component={Verify} />
-          <Route path="/signout" component={Signout} />
-          <Route path="/deleted" component={DeletePage} />
-          <Route path="/password/recovery/:findbyparam" component={ResetPassword} />
-          <Route path="/password/recovery/" component={ResetPassword} />
+          <Route exact path="/" render={props => <Home {...props} title={"MERN Login System"} />} />
+          <Route path="/about" render={props => <About {...props} title={"About"} />} />
+          <Route path="/contact" render={props => <Contact {...props} title={"Contact"} />} />
+          <Route path="/signin" render={props => <Signin {...props} title={"Signin"} />} />
+          <Route path="/register" render={props => <Register {...props} title={"Register"} />} />
+          <Route path="/members" render={props => <Members {...props} title={"Members"} />} />
+          <Route
+            path="/profile/:user_id"
+            render={props => <Profile {...props} title={"Profile"} />}
+          />
+          <Route
+            path="/email/:findbyparam"
+            render={props => <Verify {...props} title={"Verify"} />}
+          />
+          <Route path="/email/" render={props => <Verify {...props} title={"Verify"} />} />
+          <Route path="/signout" render={props => <Signout {...props} title={"Signout"} />} />
+          <Route path="/deleted" render={props => <DeletePage {...props} title={"DeletePage"} />} />
+          <Route
+            path="/password/recovery/:findbyparam"
+            render={props => <ResetPassword {...props} title={"ResetPassword"} />}
+          />
+          <Route
+            path="/password/recovery/"
+            render={props => <ResetPassword {...props} title={"ResetPassword"} />}
+          />
         </Switch>
         {/* end Routes*/}
       </div>

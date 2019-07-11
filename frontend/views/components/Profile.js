@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 import DeleteAccount from "./DeleteAccount";
 
 class Profile extends Component {
-  constructor({ match }) {
-    super();
+  constructor(props) {
+    super(props);
     this.state = {
       user_id: "",
       user: "",
@@ -23,7 +23,6 @@ class Profile extends Component {
         errorContent: ""
       }
     };
-    this.match = match;
   }
 
   loginInfo = auth.isLoggedIn();
@@ -71,7 +70,8 @@ class Profile extends Component {
   }; */
 
   componentDidMount = () => {
-    const param_id = this.match.params.user_id;
+    document.title = this.props.title;
+    const param_id = this.props.match.params.user_id;
     this.renderCurrentUser(param_id);
     this.canEdit(param_id);
   };

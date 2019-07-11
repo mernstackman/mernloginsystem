@@ -10,7 +10,9 @@ class SignIn extends Component {
     error: "",
     redirToPrev: false
   };
-
+  componentDidMount() {
+    document.title = this.props.title;
+  }
   handleChange = e => {
     // console.log(signin);
     this.setState({
