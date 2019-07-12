@@ -35,7 +35,7 @@ const list = (req, res) => {
 
   const limit = parseInt(req.query.perPage) || 10;
   const skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
-  console.log(skip, limit);
+  // console.log(skip, limit);
 
   UserModel.find({}, (err, users) => {
     if (err) {

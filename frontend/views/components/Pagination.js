@@ -18,19 +18,23 @@ class Pagination extends Component {
       pageLength: nextProps.pageLength
     });
     this.generateListItem(nextProps.pageLength);
+    console.log(nextProps.pageLength);
   }
 
   generateListItem = length => {
     const list = [];
     let item = null;
+    let active = false;
     for (let i = 0; i < length; i++) {
+      active = this.props.pagenum == i + 1;
       item = (
         <ListItem
-          className="list-item"
+          className={"list-item" + (active ? " active-page" : "")}
+          activePage={active}
           key={i}
           content={i + 1}
           handleClick={this.props.handleClick}
-          url="!#"
+          url={"/members/" + (i + 1)}
           value={i + 1}
         />
       );
@@ -40,7 +44,6 @@ class Pagination extends Component {
   };
 
   render() {
-    console.log(this.props.pagenum, this.state.pageLength);
     return (
       <Fragment>
         <PrevNextBtn

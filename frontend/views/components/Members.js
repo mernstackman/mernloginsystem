@@ -1,5 +1,5 @@
 import qs from "query-string";
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import { list } from "./../../apis/user-api";
 import { Link } from "react-router-dom";
 import Pagination from "./Pagination";
@@ -27,7 +27,7 @@ class Members extends Component {
     document.title = this.props.title;
     const { limit, pagenum } = this.state;
     const query = "?perPage=" + limit + "&pageNum=" + pagenum;
-    console.log(query);
+
     list({ query }).then(data => {
       if (data.error) {
         return this.setState({ error: data.error });
@@ -40,13 +40,11 @@ class Members extends Component {
   handleClick = e => {
     e.preventDefault();
     this.setState({
+      pagenum: e.value,
       loading: true
     });
-    // const skipnum = this.state.limit * (parseInt(e.value) - 1);
-    // console.log(skipnum);
 
     const query = "?perPage=" + this.state.limit + "&pageNum=" + e.value;
-
     list({ query }).then(data => {
       if (data.error) {
         return this.setState({ error: data.error });
@@ -55,34 +53,40 @@ class Members extends Component {
         history.pushState(null, "", "/members/" + query);
       }
       document.title = `Members | Page ${e.value}`;
-      return this.setState({ loading: false, pagenum: e.value, users: data.users });
+      return this.setState({
+        loading: false,
+        users: data.users
+      });
     });
   };
 
   render() {
-    console.log(this.state.total);
+    // console.log(this.state.total);
     return (
-      <div id="member-list">
-        {this.state.loading && (
-          <div id="loading-background">
-            <img src={bigloader} alt="big loading gif" />
-          </div>
-        )}
-        {this.state.users.map((user, index) => {
-          return (
-            <div key={user._id} className="user-item">
-              {index +
-                1 +
-                ((parseInt(this.state.pagenum) - 1) * parseInt(this.state.limit) || 0) +
-                ". " +
-                user.username}{" "}
-              <Link to={"/profile/" + user._id}>
-                <button>details</button>
-              </Link>
-              <hr />
+      <div>
+        <div id="member-list">
+          {this.state.loading && (
+            <div id="loading-background">
+              <img src={bigloader} alt="big loading gif" />
             </div>
-          );
-        })}
+          )}
+          {!this.state.loading &&
+            this.state.users.map((user, index) => {
+              return (
+                <div key={user._id} className="user-item">
+                  {index +
+                    1 +
+                    ((parseInt(this.state.pagenum) - 1) * parseInt(this.state.limit) || 0) +
+                    ". " +
+                    user.username}{" "}
+                  <Link to={"/profile/" + user._id}>
+                    <button>details</button>
+                  </Link>
+                  <hr />
+                </div>
+              );
+            })}
+        </div>
 
         <Pagination
           handleClick={this.handleClick}
