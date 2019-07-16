@@ -8,14 +8,15 @@ import bigloader from "./../../img/bigloader.gif";
 class Members extends Component {
   constructor(props) {
     super(props);
-
+    const defaultLimit = 2;
     const query = qs.parse(props.location.search);
-    const limit = query.pp || query.perPage || 1;
+    const limit = query.pp || query.perPage || defaultLimit;
     const pagenum = query.pn || query.pageNum || 1;
 
     this.state = {
       users: [],
       limit,
+      defaultLimit,
       pagenum,
       total: 0,
       loading: true,
@@ -25,14 +26,14 @@ class Members extends Component {
 
   componentDidMount() {
     document.title = this.props.title;
-    const { limit, pagenum } = this.state;
+    const { limit, pagenum, defaultLimit } = this.state;
     const query = "?perPage=" + limit + "&pageNum=" + pagenum;
 
     list({ query }).then(data => {
       if (data.error) {
         return this.setState({ error: data.error });
       }
-      const total = Math.floor(data.total / (limit || 1));
+      const total = Math.ceil(data.total / limit);
       return this.setState({ loading: false, total, users: data.users });
     });
   }
@@ -54,7 +55,7 @@ class Members extends Component {
       }
       document.title = `Members | Page ${e.value}`;
       console.log(data.total);
-      const total = Math.floor(data.total / (this.state.limit || 1));
+      const total = Math.ceil(data.total / this.state.limit);
       return this.setState({
         loading: false,
         users: data.users,
