@@ -32,7 +32,7 @@ const list = (req, res) => {
   UserModel.estimatedDocumentCount().then(resp => {
     total = resp;
   });
-
+  console.log(total);
   const limit = parseInt(req.query.perPage) || 10;
   const skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
   // console.log(skip, limit);

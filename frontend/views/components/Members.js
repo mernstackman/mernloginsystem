@@ -10,7 +10,7 @@ class Members extends Component {
     super(props);
 
     const query = qs.parse(props.location.search);
-    const limit = query.pp || query.perPage || 10;
+    const limit = query.pp || query.perPage || 1;
     const pagenum = query.pn || query.pageNum || 1;
 
     this.state = {
@@ -32,7 +32,7 @@ class Members extends Component {
       if (data.error) {
         return this.setState({ error: data.error });
       }
-      const total = Math.floor(data.total / (limit || 10));
+      const total = Math.floor(data.total / (limit || 1));
       return this.setState({ loading: false, total, users: data.users });
     });
   }
@@ -53,15 +53,22 @@ class Members extends Component {
         history.pushState(null, "", "/members/" + query);
       }
       document.title = `Members | Page ${e.value}`;
+      console.log(data.total);
+      const total = Math.floor(data.total / (this.state.limit || 1));
       return this.setState({
         loading: false,
-        users: data.users
+        users: data.users,
+        total
       });
     });
   };
 
   render() {
-    // console.log(this.state.total);
+    console.log(this.state.users);
+    if (this.state.users.length == 0) {
+      return <div> No data found...! </div>;
+    }
+
     return (
       <div>
         <div id="member-list">

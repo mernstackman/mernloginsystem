@@ -6,14 +6,14 @@ const ListItem = props => {
   console.log(props.activePage);
   const thisClick = e => {
     e.stopPropagation();
-    if (props.activePage) return e.preventDefault();
+    if (props.activePage || props.text) return e.preventDefault();
     e.value = props.value;
     return props.handleClick(e);
   };
 
   return (
     <li className={props.className} onClick={thisClick}>
-      {!props.activePage ? (
+      {!props.activePage && !props.text ? (
         <Link to={props.url} onClick={thisClick}>
           {props.content}
         </Link>
