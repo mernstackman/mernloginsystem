@@ -54,7 +54,6 @@ class Members extends Component {
         history.pushState(null, "", "/members/" + query);
       }
       document.title = `Members | Page ${e.value}`;
-      console.log(data.total);
       const total = Math.ceil(data.total / this.state.limit);
       return this.setState({
         loading: false,
@@ -65,7 +64,6 @@ class Members extends Component {
   };
 
   render() {
-    console.log(this.state.users);
     if (this.state.users.length == 0) {
       return <div> No data found...! </div>;
     }

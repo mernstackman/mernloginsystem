@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const ListItem = props => {
-  console.log(props.activePage);
   const thisClick = e => {
     e.stopPropagation();
     if (props.activePage || props.text) return e.preventDefault();

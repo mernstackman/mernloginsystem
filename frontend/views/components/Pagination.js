@@ -1,5 +1,4 @@
 import React, { Component, Fragment } from "react";
-import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import ListItem from "./ListItem";
 import PrevNextBtn from "./PrevNextBtn";
@@ -14,14 +13,10 @@ class Pagination extends Component {
     const middle = []; // Container to collect middle page numbers
     const middleLength = limit * 2 + 1; // Middle page numbers list's length
     const oneSideLength = middleLength + 1; // Left or right page numbers list's length
-    const entireLength = oneSideLength + 1; // Length of the displayed page numbers
-    // const addedDown = limit + (limit + 1 - (endPage - activeNum));
-    // const pageDown = activeNum - Math.max(limit, addedDown);
-    // Keep the middle number's length == (limit left endPalengthge + limit right length + middle length)
+    const entireLength = middleLength + 2; // Length of the displayed page numbers
+    // Keep the middle number's length == (limit left length + limit right length + middle length)
     const pageDown = Math.min(activeNum - limit, endPage - middleLength);
     const pageUp = Math.max(activeNum + limit, oneSideLength);
-    // const convertedDown = pageUp - endPage + 1 + limit;
-    // const pageDown = activeNum - Math.max(limit, convertedDown);
     const limitDown = Math.max(2, pageDown);
     const limitUp = Math.min(endPage - 1, pageUp);
     const text = "dots";
@@ -45,6 +40,7 @@ class Pagination extends Component {
         />
       );
     }
+
     // Create last page
     let lastPage;
     if (activeNum == endPage) {
@@ -64,10 +60,11 @@ class Pagination extends Component {
         />
       );
     }
+
     // Add first and last page to the list array.
     list.push(firstPage, lastPage);
 
-    // Loop middle pages
+    // Generate middle pages
     for (let num = limitDown; num <= limitUp; num++) {
       isActive = activeNum == num;
       item = (
@@ -108,8 +105,29 @@ class Pagination extends Component {
     return list;
   };
 
+  // Memoize Pagination
+  /*
+   * This method stores up to 10 generated pagination on cache object.
+   * Everytime the cache object's value reach maximum amount (10), the first value will be deleted.   *
+   */
+  cache = {};
+  memoizePagination = (activeNum, endPage) => {
+    const objKeys = Object.keys(this.cache);
+    if (objKeys.length == 10) {
+      delete this.cache[objKeys[0]];
+    }
+    if (endPage == 0) {
+      return this.generateListItem(activeNum, endPage);
+    }
+    if (!this.cache[activeNum]) {
+      this.cache[activeNum] = this.generateListItem(activeNum, endPage);
+    }
+    return this.cache[activeNum];
+  };
+
   render() {
-    const list = this.generateListItem(this.props.pagenum, this.props.pageLength);
+    let { pagenum, pageLength, handleClick } = this.props;
+    const list = this.memoizePagination(pagenum, pageLength);
     if (!isArray(list)) {
       return null;
     }
@@ -118,16 +136,16 @@ class Pagination extends Component {
       <Fragment>
         <PrevNextBtn
           text="Prev"
-          handleClick={this.props.handleClick}
-          value={this.props.pagenum - 1}
-          active={this.props.pagenum - 2 < 0}
+          handleClick={handleClick}
+          value={pagenum - 1}
+          active={pagenum - 2 < 0}
         />
         <ul className="pagination">{list}</ul>
         <PrevNextBtn
           text="Next"
-          handleClick={this.props.handleClick}
-          value={this.props.pagenum + 1}
-          active={this.props.pagenum + 1 > this.props.pageLength}
+          handleClick={handleClick}
+          value={pagenum + 1}
+          active={pagenum + 1 > pageLength}
         />
       </Fragment>
     );
