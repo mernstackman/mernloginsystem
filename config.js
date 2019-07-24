@@ -14,8 +14,8 @@ const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\
 const mailRegex = /.+\@.+\..+/;
 const passRegex = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/;
 const userRegex = /[$&+,:;=\\\\?@#|/\'\"\`\~<>.^*()%!-\s]/;
-const user = env.MAIL_USER || "mernstackemail@gmail.com";
-const pass = env.MAIL_PASS || "%3A%2F%2Fma";
+const user = env.MAIL_USER;
+const pass = env.MAIL_PASS;
 const mailUser = env.MAIL_USER;
 
 module.exports = {
