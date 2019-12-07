@@ -52,6 +52,20 @@ const UserSchema = new Schema({
   userActivation: Date
 });
 
+// Create document's property index to enable text search functionality
+UserModel.index(
+  {
+    fullname: "text",
+    username: "text",
+    email: "text"
+  },
+  {
+    fullname: 10,
+    username: 5,
+    email: 1
+  }
+);
+
 // Create virtual data of UserSchema for input field with the named password and obfuscate its value
 UserSchema.virtual("password")
   .set(function(value) {

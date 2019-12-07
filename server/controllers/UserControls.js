@@ -29,14 +29,19 @@ const create = (req, res, next) => {
 // LIST USER
 const list = (req, res) => {
   let total = 0;
+  let limit = 10;
+  let skip = 0;
+
   UserModel.estimatedDocumentCount().then(resp => {
     total = resp;
   });
-  console.log(total);
-  const limit = parseInt(req.query.perPage) || 10;
-  const skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
+  // console.log(total);
+  limit = parseInt(req.query.perPage) || 10;
+  skip = (parseInt(req.query.pageNum) - 1) * limit || 0;
   // console.log(skip, limit);
 
+
+  
   UserModel.find({}, (err, users) => {
     if (err) {
       return res.status(400).json({
@@ -48,6 +53,31 @@ const list = (req, res) => {
     .skip(skip)
     .limit(limit)
     .select("fullname email username created");
+};
+
+// SEARCH
+const search = (req, res) => {
+  const keyword = req.query.keyword;
+
+  if (!keyword) {
+    return res.json({
+      error: "No keyword is specified!"
+    });
+  }
+
+  UserModel.find(
+    {
+      $text: { $search: keyword }
+    },
+    (err, result) => {
+      if (err) {
+        return res.status(400).json({
+          error: "Something went wrong. Please try again later!"
+        });
+      }
+      return res.status(200).json(result);
+    }
+  );
 };
 
 // CLEAN ALL USERS

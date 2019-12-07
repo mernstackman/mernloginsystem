@@ -13,6 +13,7 @@ const credentials = {
     rejectUnauthorized: false
   }
 };
+
 const transporter = nodemailer.createTransport(credentials);
 
 const sendEmail = emaildata => {

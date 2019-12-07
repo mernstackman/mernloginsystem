@@ -5,7 +5,6 @@ const htmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
-  // entry: ["./frontend/main.js", "./frontend/sass/style.scss"],
   entry: {
     main: "./frontend/main.js"
   },
